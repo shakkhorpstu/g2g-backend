@@ -1,0 +1,97 @@
+<?php
+
+namespace App\Shared\Contracts\Repositories;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
+
+/**
+ * Base Repository Interface
+ * 
+ * Provides common CRUD operations that all module repositories should implement.
+ * Each module can extend this interface for their specific repository contracts.
+ */
+interface BaseRepositoryInterface
+{
+    /**
+     * Get all records
+     */
+    public function all(array $columns = ['*'], array $relations = []): Collection;
+
+    /**
+     * Get paginated records
+     */
+    public function paginate(int $perPage = 15, array $columns = ['*'], array $relations = []): LengthAwarePaginator;
+
+    /**
+     * Find by ID
+     */
+    public function findById(int $id, array $columns = ['*'], array $relations = []): ?Model;
+
+    /**
+     * Find by ID or fail
+     */
+    public function findByIdOrFail(int $id, array $columns = ['*'], array $relations = []): Model;
+
+    /**
+     * Find by specific criteria
+     */
+    public function findBy(array $criteria, array $columns = ['*'], array $relations = []): Collection;
+
+    /**
+     * Find first by criteria
+     */
+    public function findFirstBy(array $criteria, array $columns = ['*'], array $relations = []): ?Model;
+
+    /**
+     * Create new record
+     */
+    public function create(array $data): Model;
+
+    /**
+     * Update record by ID
+     */
+    public function updateById(int $id, array $data): bool;
+
+    /**
+     * Update model instance
+     */
+    public function update(Model $model, array $data): bool;
+
+    /**
+     * Delete record by ID
+     */
+    public function deleteById(int $id): bool;
+
+    /**
+     * Delete model instance
+     */
+    public function delete(Model $model): bool;
+
+    /**
+     * Count records with criteria
+     */
+    public function count(array $criteria = []): int;
+
+    /**
+     * Check if record exists
+     */
+    public function exists(array $criteria): bool;
+
+    /**
+     * Get fresh model instance
+     */
+    public function fresh(Model $model): ?Model;
+
+    /**
+     * Get new query builder instance
+     */
+    public function newQuery(): Builder;
+
+    /**
+     * Get model instance
+     */
+    public function getModelInstance(): Model;
+}
