@@ -1,0 +1,11 @@
+{
+    "name": "Profile",
+    "alias": "profile",
+    "description": "User Profile Management Module",
+    "keywords": ["profile", "user", "management"],
+    "priority": 0,
+    "providers": [
+        "Modules\\Profile\\Providers\\ProfileServiceProvider"
+    ],
+    "files": []
+}

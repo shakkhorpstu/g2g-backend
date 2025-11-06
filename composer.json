@@ -31,7 +31,7 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/",
-            "Modules\\Auth\\": "Modules/Auth/app/"
+            "Modules\\Profile\\": "Modules/Profile/app/"
         }
     },
     "autoload-dev": {
