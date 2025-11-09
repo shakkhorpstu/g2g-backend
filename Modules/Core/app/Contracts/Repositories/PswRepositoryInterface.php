@@ -24,6 +24,11 @@ interface PswRepositoryInterface
     public function updateLastLogin(Psw $psw): void;
 
     /**
+     * Update PSW password
+     */
+    public function updatePassword(Psw $psw, string $password): Psw;
+
+    /**
      * Find PSW by ID
      */
     public function findById(int $id): ?Psw;

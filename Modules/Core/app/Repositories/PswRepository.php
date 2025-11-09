@@ -45,6 +45,22 @@ class PswRepository implements PswRepositoryInterface
     }
 
     /**
+     * Update PSW password
+     *
+     * @param Psw $psw
+     * @param string $password
+     * @return Psw
+     */
+    public function updatePassword(Psw $psw, string $password): Psw
+    {
+        $psw->update([
+            'password' => Hash::make($password)
+        ]);
+
+        return $psw->fresh();
+    }
+
+    /**
      * Find PSW by ID
      */
     public function findById(int $id): ?Psw

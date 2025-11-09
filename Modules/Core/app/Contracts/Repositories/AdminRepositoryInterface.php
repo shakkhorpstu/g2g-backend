@@ -22,6 +22,11 @@ interface AdminRepositoryInterface
     public function updateLastLogin(Admin $admin): void;
 
     /**
+     * Update Admin password
+     */
+    public function updatePassword(Admin $admin, string $password): Admin;
+
+    /**
      * Find Admin by ID
      */
     public function findById(int $id): ?Admin;

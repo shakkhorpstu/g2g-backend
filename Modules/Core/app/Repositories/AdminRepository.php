@@ -43,6 +43,22 @@ class AdminRepository implements AdminRepositoryInterface
     }
 
     /**
+     * Update Admin password
+     *
+     * @param Admin $admin
+     * @param string $password
+     * @return Admin
+     */
+    public function updatePassword(Admin $admin, string $password): Admin
+    {
+        $admin->update([
+            'password' => Hash::make($password)
+        ]);
+
+        return $admin->fresh();
+    }
+
+    /**
      * Find Admin by ID
      */
     public function findById(int $id): ?Admin

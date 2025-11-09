@@ -54,6 +54,11 @@ class CoreServiceProvider extends ServiceProvider
         );
         
         $this->app->bind(
+            \Modules\Core\Contracts\Repositories\UserRepositoryInterface::class,
+            \Modules\Core\Repositories\UserRepository::class
+        );
+        
+        $this->app->bind(
             \Modules\Core\Contracts\Repositories\PswRepositoryInterface::class,
             \Modules\Core\Repositories\PswRepository::class
         );
