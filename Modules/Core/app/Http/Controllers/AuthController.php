@@ -3,17 +3,21 @@
 namespace Modules\Core\Http\Controllers;
 
 use Modules\Core\Services\AuthService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Modules\Core\Exceptions\ServiceException;
-use App\Http\Controllers\Controller;
+use Modules\Core\Http\Requests\RegisterRequest;
+use Modules\Core\Http\Requests\LoginRequest;
+use Modules\Core\Http\Requests\AdminLoginRequest;
+use Modules\Core\Http\Requests\ChangePasswordRequest;
+use Modules\Core\Http\Requests\PswRegisterRequest;
+use Modules\Core\Http\Requests\PswLoginRequest;
+use App\Http\Controllers\ApiController;
 
 /**
  * Authentication Controller
  * 
- * Handles authentication-related HTTP requests
+ * Handles authentication-related HTTP requests following the standardized API pattern
  */
-class AuthController extends Controller
+class AuthController extends ApiController
 {
     /**
      * AuthService instance
@@ -29,74 +33,50 @@ class AuthController extends Controller
      */
     public function __construct(AuthService $authService)
     {
+        parent::__construct();
         $this->authService = $authService;
     }
 
     /**
      * Register a new user
      *
-     * @param Request $request
+     * @param RegisterRequest $request
      * @return JsonResponse
      */
-    public function register(Request $request): JsonResponse
+    public function register(RegisterRequest $request): JsonResponse
     {
-        $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'sometimes|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
-            'phone_number' => 'sometimes|string|max:20',
-            'gender' => 'sometimes|in:1,2,3',
-        ]);
-
-        try {
-            $result = $this->authService->register($request->all());
-            return response()->json($result, $result['status_code']);
-        } catch (ServiceException $e) {
-            return $e->toResponse();
-        }
+        return $this->executeService(
+            fn() => $this->authService->register($request->getSanitizedData()),
+            'You have been registered successfully'
+        );
     }
 
     /**
      * Login user
      *
-     * @param Request $request
+     * @param LoginRequest $request
      * @return JsonResponse
      */
-    public function login(Request $request): JsonResponse
+    public function login(LoginRequest $request): JsonResponse
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string',
-        ]);
-
-        try {
-            $result = $this->authService->login($request->only(['email', 'password']));
-            return response()->json($result, $result['status_code']);
-        } catch (ServiceException $e) {
-            return $e->toResponse();
-        }
+        return $this->executeService(
+            fn() => $this->authService->login($request->getSanitizedData()),
+            'Login successful'
+        );
     }
 
     /**
      * Admin login
      *
-     * @param Request $request
+     * @param AdminLoginRequest $request
      * @return JsonResponse
      */
-    public function adminLogin(Request $request): JsonResponse
+    public function adminLogin(AdminLoginRequest $request): JsonResponse
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string',
-        ]);
-
-        try {
-            $result = $this->authService->adminLogin($request->only(['email', 'password']));
-            return response()->json($result, $result['status_code']);
-        } catch (ServiceException $e) {
-            return $e->toResponse();
-        }
+        return $this->executeService(
+            fn() => $this->authService->adminLogin($request->getSanitizedData()),
+            'Admin login successful'
+        );
     }
 
     /**
@@ -106,12 +86,10 @@ class AuthController extends Controller
      */
     public function logout(): JsonResponse
     {
-        try {
-            $result = $this->authService->logout();
-            return response()->json($result, $result['status_code']);
-        } catch (ServiceException $e) {
-            return $e->toResponse();
-        }
+        return $this->executeService(
+            fn() => $this->authService->logout(),
+            'Logout successful'
+        );
     }
 
     /**
@@ -121,32 +99,77 @@ class AuthController extends Controller
      */
     public function refresh(): JsonResponse
     {
-        try {
-            $result = $this->authService->refresh();
-            return response()->json($result, $result['status_code']);
-        } catch (ServiceException $e) {
-            return $e->toResponse();
-        }
+        return $this->executeService(
+            fn() => $this->authService->refresh(),
+            'Token refreshed successfully'
+        );
     }
 
     /**
      * Change user password
      *
-     * @param Request $request
+     * @param ChangePasswordRequest $request
      * @return JsonResponse
      */
-    public function changePassword(Request $request): JsonResponse
+    public function changePassword(ChangePasswordRequest $request): JsonResponse
     {
-        $request->validate([
-            'current_password' => 'required|string',
-            'new_password' => 'required|string|min:8|confirmed',
-        ]);
+        return $this->executeService(
+            fn() => $this->authService->changePassword($request->getSanitizedData()),
+            'Password changed successfully'
+        );
+    }
 
-        try {
-            $result = $this->authService->changePassword($request->all());
-            return response()->json($result, $result['status_code']);
-        } catch (ServiceException $e) {
-            return $e->toResponse();
-        }
+    /**
+     * Register a new PSW
+     *
+     * @param PswRegisterRequest $request
+     * @return JsonResponse
+     */
+    public function pswRegister(PswRegisterRequest $request): JsonResponse
+    {
+        return $this->executeService(
+            fn() => $this->authService->pswRegister($request->getSanitizedData()),
+            'You have been registered successfully'
+        );
+    }
+
+    /**
+     * Login PSW
+     *
+     * @param PswLoginRequest $request
+     * @return JsonResponse
+     */
+    public function pswLogin(PswLoginRequest $request): JsonResponse
+    {
+        return $this->executeService(
+            fn() => $this->authService->pswLogin($request->getSanitizedData()),
+            'PSW login successful'
+        );
+    }
+
+    /**
+     * Logout PSW
+     *
+     * @return JsonResponse
+     */
+    public function pswLogout(): JsonResponse
+    {
+        return $this->executeService(
+            fn() => $this->authService->pswLogout(),
+            'PSW logout successful'
+        );
+    }
+
+    /**
+     * Get PSW profile
+     *
+     * @return JsonResponse
+     */
+    public function getPswProfile(): JsonResponse
+    {
+        return $this->executeService(
+            fn() => $this->authService->getPswProfile(),
+            'PSW profile retrieved successfully'
+        );
     }
 }

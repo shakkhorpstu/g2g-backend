@@ -12,6 +12,14 @@ Route::middleware(['auth:api'])->prefix('v1/profile')->group(function () {
     Route::delete('/', [ProfileController::class, 'destroy']);     // Delete current user profile
 });
 
+// ============== PSW PROFILE ROUTES ==============
+
+// Protected PSW profile routes (PSW authentication required)
+Route::middleware(['auth:psw-api'])->prefix('v1/psw/profile')->group(function () {
+    Route::get('/', [ProfileController::class, 'pswProfile']);         // Get current PSW profile
+    Route::put('/', [ProfileController::class, 'updatePswProfile']);   // Update current PSW profile
+});
+
 // ============== ADMIN PROFILE MANAGEMENT ROUTES ==============
 
 // Admin profile management routes (admin authentication required)

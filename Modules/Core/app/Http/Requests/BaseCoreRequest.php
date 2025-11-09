@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Requests;
+namespace Modules\Core\Http\Requests;
 
 use App\Traits\ApiResponseTrait;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Contracts\Validation\Validator;
 
-abstract class BaseAuthRequest extends FormRequest
+abstract class BaseCoreRequest extends FormRequest
 {
     use ApiResponseTrait;
 
@@ -30,23 +30,8 @@ abstract class BaseAuthRequest extends FormRequest
     }
 
     /**
-     * Get custom messages for validator errors.
-     */
-    public function messages(): array
-    {
-        return [
-            'required' => 'The :attribute field is required.',
-            'string' => 'The :attribute must be a string.',
-            'email' => 'The :attribute must be a valid email address.',
-            'min' => 'The :attribute must be at least :min characters.',
-            'max' => 'The :attribute may not be greater than :max characters.',
-            'confirmed' => 'The :attribute confirmation does not match.',
-            'unique' => 'The :attribute has already been taken.',
-        ];
-    }
-
-    /**
-     * Get sanitized data after validation
+     * Get sanitized and validated data
+     * Override this method in child classes to provide custom sanitization
      */
     public function getSanitizedData(): array
     {
@@ -54,15 +39,34 @@ abstract class BaseAuthRequest extends FormRequest
     }
 
     /**
-     * Get custom attributes for validator errors.
+     * Get custom messages for validator errors.
+     */
+    public function messages(): array
+    {
+        return [
+            'required' => 'The :attribute field is required.',
+            'email.email' => 'Please provide a valid email address.',
+            'email.unique' => 'This email is already registered.',
+            'password.min' => 'Password must be at least :min characters.',
+            'password.confirmed' => 'Password confirmation does not match.',
+            'string' => 'The :attribute must be a string.',
+            'min' => 'The :attribute must be at least :min characters.',
+            'max' => 'The :attribute must not exceed :max characters.',
+        ];
+    }
+
+    /**
+     * Get custom attribute names for validator errors.
      */
     public function attributes(): array
     {
         return [
-            'name' => 'name',
+            'name' => 'full name',
             'email' => 'email address',
             'password' => 'password',
             'password_confirmation' => 'password confirmation',
+            'current_password' => 'current password',
+            'new_password' => 'new password',
         ];
     }
 }

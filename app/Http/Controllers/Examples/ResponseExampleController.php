@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Examples;
 
 use App\Http\Controllers\ApiController;
+use Modules\Core\Models\User;
 use Illuminate\Http\Request;
 
 /**
@@ -66,7 +67,7 @@ class ResponseExampleController extends ApiController
     public function paginated()
     {
         // Simulate paginated data (normally from Model::paginate())
-        $users = \App\Models\User::paginate(10);
+        $users = User::paginate(10);
 
         return $this->paginatedResponse($users, 'Users retrieved successfully');
     }

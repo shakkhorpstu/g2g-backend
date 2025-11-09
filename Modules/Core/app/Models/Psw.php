@@ -2,16 +2,22 @@
 
 namespace Modules\Core\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 
-class User extends Authenticatable
+class Psw extends Authenticatable
 {
-    /** @use HasFactory<\Modules\Core\Database\Factories\UserFactory> */
+    /** @use HasFactory<\Modules\Core\Database\Factories\PswFactory> */
     use HasApiTokens, HasFactory, Notifiable;
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'psws';
 
     /**
      * The attributes that are mass assignable.
@@ -26,7 +32,6 @@ class User extends Authenticatable
         'phone_number',
         'gender',
         'is_verified',
-        'status',
         'last_login_at',
     ];
 
@@ -49,8 +54,8 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'last_login_at' => 'datetime',
             'password' => 'hashed',
+            'last_login_at' => 'datetime',
             'is_verified' => 'boolean',
         ];
     }
@@ -60,6 +65,16 @@ class User extends Authenticatable
      */
     protected static function newFactory()
     {
-        return \Modules\Core\Database\Factories\UserFactory::new();
+        return \Modules\Core\Database\Factories\PswFactory::new();
     }
+
+    /**
+     * Get the PSW's full name.
+     */
+    public function getFullNameAttribute(): string
+    {
+        return trim($this->first_name . ' ' . $this->last_name);
+    }
+
+
 }

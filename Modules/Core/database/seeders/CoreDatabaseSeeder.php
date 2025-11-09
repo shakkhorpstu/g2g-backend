@@ -13,6 +13,8 @@ class CoreDatabaseSeeder extends Seeder
     {
         $this->call([
             UserSeeder::class,
+            PswSeeder::class,
+            AdminSeeder::class,
         ]);
     }
 }

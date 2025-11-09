@@ -68,6 +68,16 @@ class ServiceException extends Exception
     }
 
     /**
+     * Check if this is a validation error
+     *
+     * @return bool
+     */
+    public function isValidationError(): bool
+    {
+        return $this->statusCode === 422 && !empty($this->errors);
+    }
+
+    /**
      * Convert exception to JSON response
      *
      * @return JsonResponse

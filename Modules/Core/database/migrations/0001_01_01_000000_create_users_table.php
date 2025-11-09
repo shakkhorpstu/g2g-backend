@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('password');
             $table->string('phone_number', 20)->nullable()->unique();
             $table->enum('gender', [1, 2, 3])->nullable()->comment('1 = male, 2 = female, 3 = other');
+            $table->boolean('is_verified')->default(false);
             $table->timestamp('last_login_at')->nullable();
             $table->unsignedTinyInteger('status')->default(1);
             $table->rememberToken();

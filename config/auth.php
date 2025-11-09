@@ -64,6 +64,10 @@ return [
             'driver' => 'passport',
             'provider' => 'admins',
         ],
+        'psw-api' => [
+            'driver' => 'passport',
+            'provider' => 'psws',
+        ],
     ],
 
     /*
@@ -93,7 +97,11 @@ return [
         ],
         'admins' => [
             'driver' => 'eloquent',
-            'model' => Modules\Core\Models\User::class, // Use Core User model with admin role
+            'model' => Modules\Core\Models\Admin::class, // Use Core Admin model
+        ],
+        'psws' => [
+            'driver' => 'eloquent',
+            'model' => Modules\Core\Models\Psw::class, // Use Core PSW model
         ],
 
         // 'users' => [
@@ -125,6 +133,12 @@ return [
         'users' => [
             'provider' => 'users',
             'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
+            'expire' => 60,
+            'throttle' => 60,
+        ],
+        'psws' => [
+            'provider' => 'psws',
+            'table' => 'password_reset_tokens',
             'expire' => 60,
             'throttle' => 60,
         ],

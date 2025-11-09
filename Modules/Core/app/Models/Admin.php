@@ -2,16 +2,22 @@
 
 namespace Modules\Core\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 
-class User extends Authenticatable
+class Admin extends Authenticatable
 {
-    /** @use HasFactory<\Modules\Core\Database\Factories\UserFactory> */
+    /** @use HasFactory<\Modules\Core\Database\Factories\AdminFactory> */
     use HasApiTokens, HasFactory, Notifiable;
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'admins';
 
     /**
      * The attributes that are mass assignable.
@@ -19,13 +25,9 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'first_name',
-        'last_name',
+        'name',
         'email',
         'password',
-        'phone_number',
-        'gender',
-        'is_verified',
         'status',
         'last_login_at',
     ];
@@ -49,9 +51,8 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'last_login_at' => 'datetime',
             'password' => 'hashed',
-            'is_verified' => 'boolean',
+            'last_login_at' => 'datetime',
         ];
     }
 
@@ -60,6 +61,14 @@ class User extends Authenticatable
      */
     protected static function newFactory()
     {
-        return \Modules\Core\Database\Factories\UserFactory::new();
+        return \Modules\Core\Database\Factories\AdminFactory::new();
+    }
+
+    /**
+     * Check if admin is active
+     */
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
     }
 }

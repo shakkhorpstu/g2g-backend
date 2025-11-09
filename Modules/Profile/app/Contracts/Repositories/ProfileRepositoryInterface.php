@@ -2,7 +2,7 @@
 
 namespace Modules\Profile\Contracts\Repositories;
 
-use App\Models\User;
+use Modules\Core\Models\User;
 
 interface ProfileRepositoryInterface
 {

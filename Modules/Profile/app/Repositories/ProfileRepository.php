@@ -2,7 +2,7 @@
 
 namespace Modules\Profile\Repositories;
 
-use App\Models\User;
+use Modules\Core\Models\User;
 use App\Shared\Repositories\BaseRepository;
 use Modules\Profile\Contracts\Repositories\ProfileRepositoryInterface;
 

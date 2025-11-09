@@ -2,9 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use Modules\Core\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Modules\Core\Database\Seeders\CoreDatabaseSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,10 +16,18 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Run Core module seeders
+        $this->call([
+            CoreDatabaseSeeder::class,
+        ]);
+
+        // Uncomment to create additional test users
         // User::factory(10)->create();
 
+        // Create a test user if needed for development
         User::factory()->create([
-            'name' => 'Test User',
+            'first_name' => 'Test',
+            'last_name' => 'User',
             'email' => 'test@example.com',
         ]);
     }

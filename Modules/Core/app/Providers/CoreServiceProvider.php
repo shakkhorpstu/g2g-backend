@@ -52,6 +52,16 @@ class CoreServiceProvider extends ServiceProvider
             \Modules\Core\Contracts\Repositories\AuthRepositoryInterface::class,
             \Modules\Core\Repositories\AuthRepository::class
         );
+        
+        $this->app->bind(
+            \Modules\Core\Contracts\Repositories\PswRepositoryInterface::class,
+            \Modules\Core\Repositories\PswRepository::class
+        );
+        
+        $this->app->bind(
+            \Modules\Core\Contracts\Repositories\AdminRepositoryInterface::class,
+            \Modules\Core\Repositories\AdminRepository::class
+        );
     }
 
     /**

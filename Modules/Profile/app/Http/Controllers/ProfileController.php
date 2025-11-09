@@ -107,4 +107,29 @@ class ProfileController extends ApiController
             fn() => $this->profileService->deleteProfile($userId)
         );
     }
+
+    /**
+     * Get PSW Profile API
+     *
+     * @return JsonResponse
+     */
+    public function pswProfile(): JsonResponse
+    {
+        return $this->executeService(
+            fn() => $this->profileService->getPswProfile()
+        );
+    }
+
+    /**
+     * Update PSW Profile API
+     *
+     * @param UpdateProfileRequest $request
+     * @return JsonResponse
+     */
+    public function updatePswProfile(UpdateProfileRequest $request): JsonResponse
+    {
+        return $this->executeService(
+            fn() => $this->profileService->updatePswProfile($request->getSanitizedData())
+        );
+    }
 }

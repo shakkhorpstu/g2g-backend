@@ -4,6 +4,8 @@ namespace Modules\Profile\Services;
 
 use Modules\Core\Services\BaseService;
 use Modules\Core\Exceptions\ServiceException;
+use Modules\Core\Models\User;
+use Modules\Core\Models\Psw;
 use Illuminate\Support\Facades\Auth;
 use Modules\Profile\Contracts\Repositories\ProfileRepositoryInterface;
 
@@ -59,7 +61,7 @@ class ProfileService extends BaseService
             // Check if email is being updated and if it already exists
             if (isset($data['email']) && $data['email'] !== $existingUser->email) {
                 // Use Eloquent for checking email uniqueness
-                if (\App\Models\User::where('email', $data['email'])->where('id', '!=', $userId)->exists()) {
+                if (User::where('email', $data['email'])->where('id', '!=', $userId)->exists()) {
                     $this->fail(
                         'Email already exists',
                         422,
@@ -120,7 +122,7 @@ class ProfileService extends BaseService
     {
         return $this->executeWithTransaction(function () use ($data) {
             // Check if email already exists
-            if (\App\Models\User::where('email', $data['email'])->exists()) {
+            if (User::where('email', $data['email'])->exists()) {
                 $this->fail(
                     'Email already exists',
                     422,
@@ -164,5 +166,63 @@ class ProfileService extends BaseService
             ],
             'message' => 'Profile with relations retrieved successfully'
         ];
+    }
+
+    /**
+     * Get PSW profile
+     * 
+     * @return array PSW profile data
+     * @throws ServiceException When PSW profile retrieval fails
+     */
+    public function getPswProfile(): array
+    {
+        $psw = Auth::guard('psw-api')->user();
+        
+        if (!$psw) {
+            $this->fail('PSW not authenticated', 401);
+        }
+
+        return [
+            'data' => [
+                'psw' => $psw
+            ],
+            'message' => 'PSW profile retrieved successfully'
+        ];
+    }
+
+    /**
+     * Update PSW profile
+     * 
+     * @param array $data PSW profile update data
+     * @return array Updated PSW profile data
+     * @throws ServiceException When PSW profile update fails
+     */
+    public function updatePswProfile(array $data): array
+    {
+        return $this->executeWithTransaction(function () use ($data) {
+            $psw = Auth::guard('psw-api')->user();
+            
+            if (!$psw) {
+                $this->fail('PSW not authenticated', 401);
+            }
+
+            // Validate unique email if changed
+            if (isset($data['email']) && $data['email'] !== $psw->email) {
+                if (Psw::where('email', $data['email'])->where('id', '!=', $psw->id)->exists()) {
+                    $this->fail('Email already exists', 422, ['email' => ['Email is already taken']]);
+                }
+            }
+
+            // Update PSW
+            $psw->update($data);
+            $psw = $psw->fresh();
+
+            return [
+                'data' => [
+                    'psw' => $psw
+                ],
+                'message' => 'PSW profile updated successfully'
+            ];
+        });
     }
 }
