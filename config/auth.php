@@ -4,6 +4,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Authentication Configuration for Core Module
+    |--------------------------------------------------------------------------
+    |
+    | This configuration file defines authentication guards, providers, and
+    | password reset settings that work with the Core module's User model.
+    | All authentication logic is implemented in Modules/Core/.
+    |
+    | This file remains at the root level as Laravel expects it here for
+    | framework integration, but it references Core module components.
+    |
+    */
+
+    /*
+    |--------------------------------------------------------------------------
     | Authentication Defaults
     |--------------------------------------------------------------------------
     |
@@ -23,15 +37,17 @@ return [
     | Authentication Guards
     |--------------------------------------------------------------------------
     |
-    | Next, you may define every authentication guard for your application.
-    | Of course, a great default configuration has been defined for you
-    | which utilizes session storage plus the Eloquent user provider.
+    | Guards define how users are authenticated for each request. Our setup:
+    | - 'web': Session-based auth for web interface (uses Core User model)
+    | - 'api': Passport JWT auth for API endpoints (uses Core User model) 
+    | - 'admin-api': Passport JWT auth for admin endpoints (uses Core User model with role check)
     |
-    | All authentication guards have a user provider, which defines how the
-    | users are actually retrieved out of your database or other storage
-    | system used by the application. Typically, Eloquent is utilized.
+    | All guards use the Core module's User model but with different drivers
+    | and providers based on the authentication method required.
     |
-    | Supported: "session"
+    | Authentication logic is implemented in Modules/Core/Services/AuthService
+    |
+    | Supported drivers: "session", "passport"
     |
     */
 
@@ -52,16 +68,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | User Providers
+    | User Providers  
     |--------------------------------------------------------------------------
     |
-    | All authentication guards have a user provider, which defines how the
-    | users are actually retrieved out of your database or other storage
-    | system used by the application. Typically, Eloquent is utilized.
+    | User providers define how users are retrieved from storage. All providers
+    | now use the Core module's User model (Modules\Core\Models\User).
     |
-    | If you have multiple user tables or models you may configure multiple
-    | providers to represent the model / table. These providers may then
-    | be assigned to any extra authentication guards you have defined.
+    | - 'users': Standard user provider for regular authentication
+    | - 'admins': Admin provider (same model, but intended for admin guards)
+    |
+    | Both providers use the same Core User model. Role-based access control
+    | is handled in the AuthService, not at the provider level.
+    |
+    | The AUTH_MODEL environment variable can override the default model.
     |
     | Supported: "database", "eloquent"
     |
@@ -70,11 +89,11 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\User::class),
+            'model' => env('AUTH_MODEL', Modules\Core\Models\User::class),
         ],
         'admins' => [
             'driver' => 'eloquent',
-            'model' => App\Models\Admin::class,
+            'model' => Modules\Core\Models\User::class, // Use Core User model with admin role
         ],
 
         // 'users' => [

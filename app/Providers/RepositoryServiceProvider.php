@@ -25,11 +25,8 @@ class RepositoryServiceProvider extends ServiceProvider
         // Register global/shared repository bindings here
         // Module-specific repositories are handled in their respective modules
         
-        // Core authentication repository (infrastructure level)
-        $this->app->bind(
-            \App\Contracts\Repositories\AuthRepositoryInterface::class, 
-            \App\Repositories\AuthRepository::class
-        );
+        // Note: Authentication repositories are now handled in Core module
+        // See: Modules/Core/app/Providers/CoreServiceProvider.php
         
         // Example for other global repositories:
         // $this->app->bind(GlobalConfigRepositoryInterface::class, GlobalConfigRepository::class);

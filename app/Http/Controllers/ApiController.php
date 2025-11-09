@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Traits\ApiResponseTrait;
-use App\Exceptions\ServiceException;
+use Modules\Core\Exceptions\ServiceException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
