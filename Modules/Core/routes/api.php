@@ -20,21 +20,19 @@ Route::prefix('v1')->group(function () {
 });
 
 // Protected authentication routes - Client/User
-Route::middleware(['auth:api'])->prefix('v1/auth')->group(function () {
-    Route::post('logout', [UserAuthController::class, 'logout']);
-    Route::post('refresh', [UserAuthController::class, 'refresh']);
-    Route::post('change-password', [UserAuthController::class, 'changePassword']);
+Route::middleware(['auth:api'])->prefix('v1')->group(function () {
+    Route::post('client-logout', [UserAuthController::class, 'logout']);
+    Route::post('client-refresh', [UserAuthController::class, 'refresh']);
 });
 
 // Protected authentication routes - PSW
-Route::middleware(['auth:psw-api'])->prefix('v1/psw')->group(function () {
-    Route::post('logout', [PswAuthController::class, 'logout']);
-    Route::post('refresh', [PswAuthController::class, 'refresh']);
+Route::middleware(['auth:psw-api'])->prefix('v1')->group(function () {
+    Route::post('psw-logout', [PswAuthController::class, 'logout']);
+    Route::post('psw-refresh', [PswAuthController::class, 'refresh']);
 });
 
 // Protected authentication routes - Admin
-Route::middleware(['auth:admin-api'])->prefix('v1/admin')->group(function () {
-    Route::post('logout', [AdminAuthController::class, 'logout']);
-    Route::post('refresh', [AdminAuthController::class, 'refresh']);
-    Route::get('profile', [AdminAuthController::class, 'profile']);
+Route::middleware(['auth:admin-api'])->prefix('v1')->group(function () {
+    Route::post('admin-logout', [AdminAuthController::class, 'logout']);
+    Route::post('admin-refresh', [AdminAuthController::class, 'refresh']);
 });
