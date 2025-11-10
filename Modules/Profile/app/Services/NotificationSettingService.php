@@ -4,7 +4,7 @@ namespace Modules\Profile\Services;
 
 use Modules\Profile\Models\NotificationSetting;
 use Modules\Profile\Contracts\Repositories\NotificationSettingRepositoryInterface;
-use Modules\Core\Services\BaseService;
+use App\Shared\Services\BaseService;
 
 class NotificationSettingService extends BaseService
 {

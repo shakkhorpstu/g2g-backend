@@ -3,7 +3,7 @@
 namespace Modules\Profile\Services;
 
 use Modules\Profile\Contracts\Repositories\UserProfileRepositoryInterface;
-use Modules\Core\Services\BaseService;
+use App\Shared\Services\BaseService;
 
 class UserProfileService extends BaseService
 {

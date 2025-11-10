@@ -2,8 +2,8 @@
 
 namespace Modules\Profile\Services;
 
-use Modules\Core\Services\BaseService;
-use Modules\Core\Exceptions\ServiceException;
+use App\Shared\Services\BaseService;
+use App\Shared\Exceptions\ServiceException;
 use Modules\Core\Models\User;
 use Modules\Core\Models\Psw;
 use Illuminate\Support\Facades\Auth;

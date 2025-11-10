@@ -1,8 +1,8 @@
 <?php
 
-namespace Modules\Core\Services;
+namespace App\Shared\Services;
 
-use Modules\Core\Exceptions\ServiceException;
+use App\Shared\Exceptions\ServiceException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
  * - Transaction management
  * - Error handling
  * - Consistent response formatting
+ * - Multi-guard authentication
  */
 abstract class BaseService
 {
@@ -116,7 +117,7 @@ abstract class BaseService
      * This method supports multiple authentication guards and can be used
      * across all services that need to identify the current authenticated user.
      * 
-     * Supported guards:
+     * The guards are configured in config/auth.php and point to:
      * - 'api' guard for regular Users (Modules\Core\Models\User)
      * - 'psw-api' guard for PSWs (Modules\Core\Models\Psw) 
      * - 'admin-api' guard for Admins (Modules\Core\Models\Admin)

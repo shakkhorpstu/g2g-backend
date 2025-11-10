@@ -3,7 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Modules\Core\Exceptions\ServiceException;
+use App\Shared\Exceptions\ServiceException;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\AuthenticationException;

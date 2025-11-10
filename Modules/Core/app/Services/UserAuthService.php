@@ -3,7 +3,8 @@
 namespace Modules\Core\Services;
 
 use Modules\Core\Contracts\Repositories\UserRepositoryInterface;
-use Modules\Core\Exceptions\ServiceException;
+use App\Shared\Exceptions\ServiceException;
+use App\Shared\Services\BaseService;
 use Modules\Core\Events\UserRegistered;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;

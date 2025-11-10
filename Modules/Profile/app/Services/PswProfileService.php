@@ -3,7 +3,7 @@
 namespace Modules\Profile\Services;
 
 use Modules\Profile\Contracts\Repositories\PswProfileRepositoryInterface;
-use Modules\Core\Services\BaseService;
+use App\Shared\Services\BaseService;
 
 class PswProfileService extends BaseService
 {

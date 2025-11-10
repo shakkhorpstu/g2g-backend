@@ -5,7 +5,8 @@ namespace Modules\Core\Services;
 use Modules\Core\Contracts\Repositories\AuthRepositoryInterface;
 use Modules\Core\Contracts\Repositories\PswRepositoryInterface;
 use Modules\Core\Contracts\Repositories\AdminRepositoryInterface;
-use Modules\Core\Exceptions\ServiceException;
+use App\Shared\Exceptions\ServiceException;
+use App\Shared\Services\BaseService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
