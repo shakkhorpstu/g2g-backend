@@ -176,11 +176,7 @@ class ProfileService extends BaseService
      */
     public function getPswProfile(): array
     {
-        $psw = Auth::guard('psw-api')->user();
-        
-        if (!$psw) {
-            $this->fail('PSW not authenticated', 401);
-        }
+        $psw = $this->getAuthenticatedUserOrFail(['psw-api'], 'PSW not authenticated');
 
         return [
             'data' => [
@@ -200,11 +196,7 @@ class ProfileService extends BaseService
     public function updatePswProfile(array $data): array
     {
         return $this->executeWithTransaction(function () use ($data) {
-            $psw = Auth::guard('psw-api')->user();
-            
-            if (!$psw) {
-                $this->fail('PSW not authenticated', 401);
-            }
+            $psw = $this->getAuthenticatedUserOrFail(['psw-api'], 'PSW not authenticated');
 
             // Validate unique email if changed
             if (isset($data['email']) && $data['email'] !== $psw->email) {

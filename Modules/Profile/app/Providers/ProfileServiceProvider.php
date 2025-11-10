@@ -40,6 +40,12 @@ class ProfileServiceProvider extends ServiceProvider
         
         // Profile-specific service registrations
         $this->app->bind(\Modules\Profile\Services\ProfileService::class);
+        
+        // Bind notification setting repository interface
+        $this->app->bind(
+            \Modules\Profile\Contracts\Repositories\NotificationSettingRepositoryInterface::class,
+            \Modules\Profile\Repositories\NotificationSettingRepository::class
+        );
     }
 
     /**

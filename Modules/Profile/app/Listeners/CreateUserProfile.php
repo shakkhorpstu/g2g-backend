@@ -4,6 +4,7 @@ namespace Modules\Profile\Listeners;
 
 use Modules\Core\Events\UserRegistered;
 use Modules\Profile\Services\UserProfileService;
+use Modules\Profile\Models\NotificationSetting;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
@@ -48,12 +49,15 @@ class CreateUserProfile
                 'language_id' => $event->registrationData['language_id'] ?? null
             ]);
 
-            Log::info('User profile created successfully', [
+            // Create initial notification settings for the user
+            NotificationSetting::createDefaults($event->user);
+
+            Log::info('User profile and notification settings created successfully', [
                 'user_id' => $event->user->id,
                 'email' => $event->user->email
             ]);
         } catch (\Exception $e) {
-            Log::error('Failed to create user profile', [
+            Log::error('Failed to create user profile or notification settings', [
                 'user_id' => $event->user->id,
                 'email' => $event->user->email,
                 'error' => $e->getMessage()

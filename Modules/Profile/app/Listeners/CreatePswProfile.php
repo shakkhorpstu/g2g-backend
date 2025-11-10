@@ -4,6 +4,7 @@ namespace Modules\Profile\Listeners;
 
 use Modules\Core\Events\PswRegistered;
 use Modules\Profile\Services\PswProfileService;
+use Modules\Profile\Models\NotificationSetting;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
@@ -48,12 +49,15 @@ class CreatePswProfile
                 'language_id' => $event->registrationData['language_id'] ?? null
             ]);
 
-            Log::info('PSW profile created successfully', [
+            // Create initial notification settings for the PSW
+            NotificationSetting::createDefaults($event->psw);
+
+            Log::info('PSW profile and notification settings created successfully', [
                 'psw_id' => $event->psw->id,
                 'email' => $event->psw->email
             ]);
         } catch (\Exception $e) {
-            Log::error('Failed to create PSW profile', [
+            Log::error('Failed to create PSW profile or notification settings', [
                 'psw_id' => $event->psw->id,
                 'email' => $event->psw->email,
                 'error' => $e->getMessage()

@@ -4,7 +4,6 @@ namespace Modules\Profile\Services;
 
 use Modules\Profile\Contracts\Repositories\UserProfileRepositoryInterface;
 use Modules\Core\Services\BaseService;
-use Illuminate\Support\Facades\Auth;
 
 class UserProfileService extends BaseService
 {
@@ -32,11 +31,7 @@ class UserProfileService extends BaseService
      */
     public function getProfile(): array
     {
-        $user = Auth::guard('api')->user();
-        
-        if (!$user) {
-            $this->fail('User not authenticated', 401);
-        }
+        $user = $this->getAuthenticatedUserOrFail(['api'], 'User not authenticated');
 
         $userWithProfile = $this->userProfileRepository->getUserWithProfile($user->id);
 
@@ -55,11 +50,7 @@ class UserProfileService extends BaseService
     public function updateProfile(array $data): array
     {
         return $this->executeWithTransaction(function () use ($data) {
-            $user = Auth::guard('api')->user();
-            
-            if (!$user) {
-                $this->fail('User not authenticated', 401);
-            }
+            $user = $this->getAuthenticatedUserOrFail(['api'], 'User not authenticated');
 
             // Update profile data
             $profileData = array_intersect_key($data, array_flip(['language_id']));
@@ -104,11 +95,7 @@ class UserProfileService extends BaseService
     public function deleteProfile(): array
     {
         return $this->executeWithTransaction(function () {
-            $user = Auth::guard('api')->user();
-            
-            if (!$user) {
-                $this->fail('User not authenticated', 401);
-            }
+            $user = $this->getAuthenticatedUserOrFail(['api'], 'User not authenticated');
 
             $deleted = $this->userProfileRepository->delete($user->id);
 

@@ -4,6 +4,7 @@ namespace Modules\Core\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
@@ -70,11 +71,19 @@ class Psw extends Authenticatable
     }
 
     /**
-     * Get the PSW's profile.
+     * Get the profile associated with the PSW.
      */
     public function profile(): HasOne
     {
-        return $this->hasOne(PswProfile::class);
+        return $this->hasOne(PswProfile::class, 'psw_id');
+    }
+
+    /**
+     * Get the notification setting for the PSW.
+     */
+    public function notificationSetting(): MorphOne
+    {
+        return $this->morphOne(\Modules\Profile\Models\NotificationSetting::class, 'notifiable');
     }
 
     /**

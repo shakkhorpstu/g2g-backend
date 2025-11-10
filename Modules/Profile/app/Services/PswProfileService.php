@@ -4,7 +4,6 @@ namespace Modules\Profile\Services;
 
 use Modules\Profile\Contracts\Repositories\PswProfileRepositoryInterface;
 use Modules\Core\Services\BaseService;
-use Illuminate\Support\Facades\Auth;
 
 class PswProfileService extends BaseService
 {
@@ -32,11 +31,7 @@ class PswProfileService extends BaseService
      */
     public function getProfile(): array
     {
-        $psw = Auth::guard('psw-api')->user();
-        
-        if (!$psw) {
-            $this->fail('PSW not authenticated', 401);
-        }
+        $psw = $this->getAuthenticatedUserOrFail(['psw-api'], 'PSW not authenticated');
 
         $pswWithProfile = $this->pswProfileRepository->getPswWithProfile($psw->id);
 
@@ -55,11 +50,7 @@ class PswProfileService extends BaseService
     public function updateProfile(array $data): array
     {
         return $this->executeWithTransaction(function () use ($data) {
-            $psw = Auth::guard('psw-api')->user();
-            
-            if (!$psw) {
-                $this->fail('PSW not authenticated', 401);
-            }
+            $psw = $this->getAuthenticatedUserOrFail(['psw-api'], 'PSW not authenticated');
 
             // Update profile data
             $profileData = array_intersect_key($data, array_flip(['language_id']));
@@ -104,11 +95,7 @@ class PswProfileService extends BaseService
     public function deleteProfile(): array
     {
         return $this->executeWithTransaction(function () {
-            $psw = Auth::guard('psw-api')->user();
-            
-            if (!$psw) {
-                $this->fail('PSW not authenticated', 401);
-            }
+            $psw = $this->getAuthenticatedUserOrFail(['psw-api'], 'PSW not authenticated');
 
             $deleted = $this->pswProfileRepository->delete($psw->id);
 
