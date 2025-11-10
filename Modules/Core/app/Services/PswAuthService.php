@@ -4,6 +4,7 @@ namespace Modules\Core\Services;
 
 use Modules\Core\Contracts\Repositories\PswRepositoryInterface;
 use Modules\Core\Exceptions\ServiceException;
+use Modules\Core\Events\PswRegistered;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
@@ -48,6 +49,9 @@ class PswAuthService extends BaseService
 
             // Create PSW
             $psw = $this->pswRepository->create($data);
+
+            // Fire PSW registered event (Profile module will handle profile creation)
+            event(new PswRegistered($psw, $data));
 
             // Generate token using Passport
             $token = $psw->createToken('psw_auth_token')->accessToken;

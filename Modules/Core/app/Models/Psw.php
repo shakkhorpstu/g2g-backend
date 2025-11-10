@@ -3,6 +3,7 @@
 namespace Modules\Core\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
@@ -69,12 +70,18 @@ class Psw extends Authenticatable
     }
 
     /**
+     * Get the PSW's profile.
+     */
+    public function profile(): HasOne
+    {
+        return $this->hasOne(PswProfile::class);
+    }
+
+    /**
      * Get the PSW's full name.
      */
     public function getFullNameAttribute(): string
     {
         return trim($this->first_name . ' ' . $this->last_name);
     }
-
-
 }

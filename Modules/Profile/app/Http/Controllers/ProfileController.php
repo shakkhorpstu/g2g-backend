@@ -5,17 +5,21 @@ namespace Modules\Profile\Http\Controllers;
 use App\Http\Controllers\ApiController;
 use Modules\Profile\Http\Requests\UpdateProfileRequest;
 use Modules\Profile\Http\Requests\CreateProfileRequest;
-use Modules\Profile\Services\ProfileService;
+use Modules\Profile\Services\UserProfileService;
+use Modules\Profile\Services\PswProfileService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 class ProfileController extends ApiController
 {
-    protected ProfileService $profileService;
+    protected UserProfileService $userProfileService;
+    protected PswProfileService $pswProfileService;
 
-    public function __construct(ProfileService $profileService)
+    public function __construct(UserProfileService $userProfileService, PswProfileService $pswProfileService)
     {
-        $this->profileService = $profileService;
+        parent::__construct();
+        $this->userProfileService = $userProfileService;
+        $this->pswProfileService = $pswProfileService;
     }
 
     /**
@@ -26,7 +30,7 @@ class ProfileController extends ApiController
     public function index(): JsonResponse
     {
         return $this->executeService(
-            fn() => $this->profileService->getProfile()
+            fn() => $this->userProfileService->getProfile()
         );
     }
 
@@ -39,7 +43,7 @@ class ProfileController extends ApiController
     public function update(UpdateProfileRequest $request): JsonResponse
     {
         return $this->executeService(
-            fn() => $this->profileService->updateProfile($request->getSanitizedData())
+            fn() => $this->userProfileService->updateProfile($request->getSanitizedData())
         );
     }
 
@@ -51,12 +55,13 @@ class ProfileController extends ApiController
     public function destroy(): JsonResponse
     {
         return $this->executeService(
-            fn() => $this->profileService->deleteProfile()
+            fn() => $this->userProfileService->deleteProfile()
         );
     }
 
     /**
      * Create User Profile API (Admin only)
+     * TODO: Implement proper admin functionality
      *
      * @param CreateProfileRequest $request
      * @return JsonResponse
@@ -64,12 +69,13 @@ class ProfileController extends ApiController
     public function store(CreateProfileRequest $request): JsonResponse
     {
         return $this->executeServiceForCreation(
-            fn() => $this->profileService->createProfile($request->getSanitizedData())
+            fn() => $this->userProfileService->createInitialProfile(auth('api')->id(), $request->getSanitizedData())
         );
     }
 
     /**
      * Get Profile by ID API (Admin only)
+     * TODO: Implement proper admin functionality
      *
      * @param int $userId
      * @return JsonResponse
@@ -77,12 +83,13 @@ class ProfileController extends ApiController
     public function show(int $userId): JsonResponse
     {
         return $this->executeService(
-            fn() => $this->profileService->getProfile($userId)
+            fn() => $this->userProfileService->getProfile()
         );
     }
 
     /**
      * Update Profile by ID API (Admin only)
+     * TODO: Implement proper admin functionality
      *
      * @param UpdateProfileRequest $request
      * @param int $userId
@@ -91,12 +98,13 @@ class ProfileController extends ApiController
     public function updateById(UpdateProfileRequest $request, int $userId): JsonResponse
     {
         return $this->executeService(
-            fn() => $this->profileService->updateProfile($request->getSanitizedData(), $userId)
+            fn() => $this->userProfileService->updateProfile($request->getSanitizedData())
         );
     }
 
     /**
      * Delete Profile by ID API (Admin only)
+     * TODO: Implement proper admin functionality
      *
      * @param int $userId
      * @return JsonResponse
@@ -104,7 +112,7 @@ class ProfileController extends ApiController
     public function destroyById(int $userId): JsonResponse
     {
         return $this->executeService(
-            fn() => $this->profileService->deleteProfile($userId)
+            fn() => $this->userProfileService->deleteProfile()
         );
     }
 
@@ -116,7 +124,7 @@ class ProfileController extends ApiController
     public function pswProfile(): JsonResponse
     {
         return $this->executeService(
-            fn() => $this->profileService->getPswProfile()
+            fn() => $this->pswProfileService->getProfile()
         );
     }
 
@@ -129,7 +137,7 @@ class ProfileController extends ApiController
     public function updatePswProfile(UpdateProfileRequest $request): JsonResponse
     {
         return $this->executeService(
-            fn() => $this->profileService->updatePswProfile($request->getSanitizedData())
+            fn() => $this->pswProfileService->updateProfile($request->getSanitizedData())
         );
     }
 }

@@ -11,7 +11,14 @@ class EventServiceProvider extends ServiceProvider
      *
      * @var array<string, array<int, string>>
      */
-    protected $listen = [];
+    protected $listen = [
+        \Modules\Core\Events\UserRegistered::class => [
+            \Modules\Profile\Listeners\CreateUserProfile::class,
+        ],
+        \Modules\Core\Events\PswRegistered::class => [
+            \Modules\Profile\Listeners\CreatePswProfile::class,
+        ],
+    ];
 
     /**
      * Indicates if events should be discovered.

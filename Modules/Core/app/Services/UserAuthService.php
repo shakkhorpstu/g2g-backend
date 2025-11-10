@@ -4,6 +4,7 @@ namespace Modules\Core\Services;
 
 use Modules\Core\Contracts\Repositories\UserRepositoryInterface;
 use Modules\Core\Exceptions\ServiceException;
+use Modules\Core\Events\UserRegistered;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
@@ -48,6 +49,9 @@ class UserAuthService extends BaseService
 
             // Create user
             $user = $this->userRepository->create($data);
+
+            // Fire user registered event (Profile module will handle profile creation)
+            event(new UserRegistered($user, $data));
 
             // Generate token using Passport
             $token = $user->createToken('auth_token')->accessToken;

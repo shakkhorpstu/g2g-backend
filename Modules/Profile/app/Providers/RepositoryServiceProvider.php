@@ -5,6 +5,10 @@ namespace Modules\Profile\Providers;
 use Illuminate\Support\ServiceProvider;
 use Modules\Profile\Contracts\Repositories\ProfileRepositoryInterface;
 use Modules\Profile\Repositories\ProfileRepository;
+use Modules\Profile\Contracts\Repositories\UserProfileRepositoryInterface;
+use Modules\Profile\Repositories\UserProfileRepository;
+use Modules\Profile\Contracts\Repositories\PswProfileRepositoryInterface;
+use Modules\Profile\Repositories\PswProfileRepository;
 
 /**
  * Profile Repository Service Provider
@@ -22,11 +26,11 @@ class RepositoryServiceProvider extends ServiceProvider
         // Bind Profile Repository Interfaces to their Implementations
         $this->app->bind(ProfileRepositoryInterface::class, ProfileRepository::class);
         
-        // Add more Profile module repository bindings here as needed
-        // Example:
-        // $this->app->bind(ProfileSettingsRepositoryInterface::class, ProfileSettingsRepository::class);
-        // $this->app->bind(RoleRepositoryInterface::class, RoleRepository::class);
-        // $this->app->bind(PermissionRepositoryInterface::class, PermissionRepository::class);
+        // Bind User Profile Repository
+        $this->app->bind(UserProfileRepositoryInterface::class, UserProfileRepository::class);
+        
+        // Bind PSW Profile Repository
+        $this->app->bind(PswProfileRepositoryInterface::class, PswProfileRepository::class);
     }
 
     /**
