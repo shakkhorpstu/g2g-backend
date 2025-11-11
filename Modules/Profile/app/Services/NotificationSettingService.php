@@ -5,6 +5,7 @@ namespace Modules\Profile\Services;
 use Modules\Profile\Models\NotificationSetting;
 use Modules\Profile\Contracts\Repositories\NotificationSettingRepositoryInterface;
 use App\Shared\Services\BaseService;
+use App\Shared\Services\DataTransformer;
 
 class NotificationSettingService extends BaseService
 {
@@ -95,13 +96,13 @@ class NotificationSettingService extends BaseService
     private function getResponseFormat($settings): array
     {
         return [
-            'appointment_notification' => $settings->appointment_notification,
-            'activity_email' => $settings->activity_email,
-            'activity_sms' => $settings->activity_sms,
-            'activity_push' => $settings->activity_push,
-            'promotional_email' => $settings->promotional_email,
-            'promotional_sms' => $settings->promotional_sms,
-            'promotional_push' => $settings->promotional_push,
+            'appointment_notification' => DataTransformer::formatBoolean($settings->appointment_notification),
+            'activity_email' => DataTransformer::formatBoolean($settings->activity_email),
+            'activity_sms' => DataTransformer::formatBoolean($settings->activity_sms),
+            'activity_push' => DataTransformer::formatBoolean($settings->activity_push),
+            'promotional_email' => DataTransformer::formatBoolean($settings->promotional_email),
+            'promotional_sms' => DataTransformer::formatBoolean($settings->promotional_sms),
+            'promotional_push' => DataTransformer::formatBoolean($settings->promotional_push),
         ];
     }
 }
