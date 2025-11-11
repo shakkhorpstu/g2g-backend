@@ -11,7 +11,14 @@ class EventServiceProvider extends ServiceProvider
      *
      * @var array<string, array<int, string>>
      */
-    protected $listen = [];
+    protected $listen = [
+        \Modules\Core\Events\OtpSent::class => [
+            \Modules\Core\Listeners\SendOtpNotification::class,
+        ],
+        \Modules\Core\Events\OtpVerified::class => [
+            \Modules\Core\Listeners\LogOtpVerification::class,
+        ],
+    ];
 
     /**
      * Indicates if events should be discovered.

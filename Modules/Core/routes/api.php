@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Core\Http\Controllers\UserAuthController;
 use Modules\Core\Http\Controllers\PswAuthController;
 use Modules\Core\Http\Controllers\AdminAuthController;
+use Modules\Core\Http\Controllers\OtpController;
 
 // Public authentication routes
 Route::prefix('v1')->group(function () {
@@ -17,6 +18,10 @@ Route::prefix('v1')->group(function () {
     
     // Admin authentication
     Route::post('admin-login', [AdminAuthController::class, 'login']);
+    
+    // OTP routes
+    Route::post('resend-otp', [OtpController::class, 'resendOtp']);
+    Route::post('verify-otp', [OtpController::class, 'verifyOtp']);
 });
 
 // Protected authentication routes - Client/User

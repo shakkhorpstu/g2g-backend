@@ -6,6 +6,7 @@ use Modules\Core\Contracts\Repositories\PswRepositoryInterface;
 use App\Shared\Exceptions\ServiceException;
 use App\Shared\Services\BaseService;
 use Modules\Core\Events\PswRegistered;
+use Modules\Core\Services\OtpService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
@@ -24,13 +25,22 @@ class PswAuthService extends BaseService
     protected PswRepositoryInterface $pswRepository;
 
     /**
+     * OTP service instance
+     *
+     * @var OtpService
+     */
+    protected OtpService $otpService;
+
+    /**
      * PswAuthService constructor
      *
      * @param PswRepositoryInterface $pswRepository
+     * @param OtpService $otpService
      */
-    public function __construct(PswRepositoryInterface $pswRepository)
+    public function __construct(PswRepositoryInterface $pswRepository, OtpService $otpService)
     {
         $this->pswRepository = $pswRepository;
+        $this->otpService = $otpService;
     }
 
     /**
@@ -54,14 +64,23 @@ class PswAuthService extends BaseService
             // Fire PSW registered event (Profile module will handle profile creation)
             event(new PswRegistered($psw, $data));
 
+            // Send account verification OTP to email
+            $this->otpService->resendOtp(
+                $psw->email,
+                'account_verification',
+                get_class($psw),
+                $psw->id
+            );
+
             // Generate token using Passport
             $token = $psw->createToken('psw_auth_token')->accessToken;
 
             return $this->success([
                 'psw' => $psw,
                 'token' => $token,
-                'token_type' => 'Bearer'
-            ], 'PSW registered successfully', 201);
+                'token_type' => 'Bearer',
+                'message' => 'Please verify your email with the OTP sent to your email address'
+            ], 'PSW registered successfully. Verification OTP sent to email.', 201);
         });
     }
 

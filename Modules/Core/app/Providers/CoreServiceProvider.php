@@ -67,6 +67,11 @@ class CoreServiceProvider extends ServiceProvider
             \Modules\Core\Contracts\Repositories\AdminRepositoryInterface::class,
             \Modules\Core\Repositories\AdminRepository::class
         );
+        
+        $this->app->bind(
+            \Modules\Core\Contracts\Repositories\OtpRepositoryInterface::class,
+            \Modules\Core\Repositories\OtpRepository::class
+        );
     }
 
     /**

@@ -6,6 +6,7 @@ use Modules\Core\Contracts\Repositories\UserRepositoryInterface;
 use App\Shared\Exceptions\ServiceException;
 use App\Shared\Services\BaseService;
 use Modules\Core\Events\UserRegistered;
+use Modules\Core\Services\OtpService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
@@ -24,13 +25,22 @@ class UserAuthService extends BaseService
     protected UserRepositoryInterface $userRepository;
 
     /**
+     * OTP service instance
+     *
+     * @var OtpService
+     */
+    protected OtpService $otpService;
+
+    /**
      * UserAuthService constructor
      *
      * @param UserRepositoryInterface $userRepository
+     * @param OtpService $otpService
      */
-    public function __construct(UserRepositoryInterface $userRepository)
+    public function __construct(UserRepositoryInterface $userRepository, OtpService $otpService)
     {
         $this->userRepository = $userRepository;
+        $this->otpService = $otpService;
     }
 
     /**
@@ -48,11 +58,24 @@ class UserAuthService extends BaseService
                 $this->fail('Email already exists', 422, ['email' => ['Email is already taken']]);
             }
 
+            // Set default status if not provided
+            if (!isset($data['status'])) {
+                $data['status'] = \Modules\Core\Models\User::STATUS_ACTIVE;
+            }
+
             // Create user
             $user = $this->userRepository->create($data);
 
             // Fire user registered event (Profile module will handle profile creation)
             event(new UserRegistered($user, $data));
+
+            // Send account verification OTP to email
+            $this->otpService->resendOtp(
+                $user->email,
+                'account_verification',
+                get_class($user),
+                $user->id
+            );
 
             // Generate token using Passport
             $token = $user->createToken('auth_token')->accessToken;
@@ -60,8 +83,9 @@ class UserAuthService extends BaseService
             return $this->success([
                 'user' => $user,
                 'token' => $token,
-                'token_type' => 'Bearer'
-            ], 'User registered successfully', 201);
+                'token_type' => 'Bearer',
+                'message' => 'Please verify your email with the OTP sent to your email address'
+            ], 'User registered successfully. Verification OTP sent to email.', 201);
         });
     }
 

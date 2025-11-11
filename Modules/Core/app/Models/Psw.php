@@ -4,6 +4,7 @@ namespace Modules\Core\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -84,6 +85,11 @@ class Psw extends Authenticatable
     public function notificationSetting(): MorphOne
     {
         return $this->morphOne(\Modules\Profile\Models\NotificationSetting::class, 'notifiable');
+    }
+
+    public function otpVerification(): MorphMany
+    {
+        return $this->morphMany(\Modules\Core\Models\OtpVerification::class, 'otpable');
     }
 
     /**
