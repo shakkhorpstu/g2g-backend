@@ -58,10 +58,10 @@ class UserProfileRepository implements UserProfileRepositoryInterface
      * @param array $data
      * @return UserProfile
      */
-    public function updateOrCreate(int $userId, array $data): UserProfile
+     public function updateOrCreate(int $userId, array $data): User
     {
-        return UserProfile::updateOrCreate(
-            ['user_id' => $userId],
+        return User::updateOrCreate(
+            ['id' => $userId],
             $data
         );
     }

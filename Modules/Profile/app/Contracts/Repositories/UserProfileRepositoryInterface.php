@@ -40,7 +40,7 @@ interface UserProfileRepositoryInterface
      * @param array $data
      * @return UserProfile
      */
-    public function updateOrCreate(int $userId, array $data): UserProfile;
+    public function updateOrCreate(int $userId, array $data): User;
 
     /**
      * Delete user profile
