@@ -3,6 +3,7 @@
 namespace Modules\Core\Services;
 
 use Modules\Core\Contracts\Repositories\UserRepositoryInterface;
+use Modules\Core\Contracts\Repositories\OtpRepositoryInterface;
 use App\Shared\Exceptions\ServiceException;
 use App\Shared\Services\BaseService;
 use Modules\Core\Events\UserRegistered;
@@ -32,15 +33,24 @@ class UserAuthService extends BaseService
     protected OtpService $otpService;
 
     /**
+     * OTP repository instance
+     *
+     * @var OtpRepositoryInterface
+     */
+    protected OtpRepositoryInterface $otpRepository;
+
+    /**
      * UserAuthService constructor
      *
      * @param UserRepositoryInterface $userRepository
      * @param OtpService $otpService
+     * @param OtpRepositoryInterface $otpRepository
      */
-    public function __construct(UserRepositoryInterface $userRepository, OtpService $otpService)
+    public function __construct(UserRepositoryInterface $userRepository, OtpService $otpService, OtpRepositoryInterface $otpRepository)
     {
         $this->userRepository = $userRepository;
         $this->otpService = $otpService;
+        $this->otpRepository = $otpRepository;
     }
 
     /**
@@ -101,7 +111,6 @@ class UserAuthService extends BaseService
         return $this->executeWithTransaction(function () use ($credentials) {
             // Find user by email
             $user = $this->userRepository->findByEmail($credentials['email']);
-            
             if (!$user) {
                 $this->fail('Invalid credentials', 401);
             }
@@ -109,6 +118,23 @@ class UserAuthService extends BaseService
             // Verify password
             if (!Hash::check($credentials['password'], $user->password)) {
                 $this->fail('Invalid credentials', 401);
+            }
+
+            // Block login if account not verified by OTP
+            $otpVerification = $this->otpRepository->findByOtpableAndType(
+                get_class($user),
+                $user->id,
+                'account_verification'
+            );
+            if (!$otpVerification || !$otpVerification->isVerified()) {
+                $this->fail(
+                    'Account not verified. Please verify your email with the OTP sent during registration.',
+                    403,
+                    [
+                        'requires_verification' => true,
+                        'email' => $user->email
+                    ]
+                );
             }
 
             // Update last login
