@@ -50,42 +50,76 @@ class UserProfileService extends BaseService
      * @param array $data
      * @return array
      */
-   public function updateProfile(array $data): array
- {
-    return $this->executeWithTransaction(function () use ($data) {
-        $user = $this->getAuthenticatedUserOrFail(['api'], 'User not authenticated');
+    public function updateProfile(array $data): array
+    {
+        return $this->executeWithTransaction(function () use ($data) {
+            $user = $this->getAuthenticatedUserOrFail(['api'], 'User not authenticated');
 
-        $profileData = $data;
+            // Handle email change separately with OTP verification
+            if (isset($data['email']) && $data['email'] !== $user->email) {
+                // Send OTP to NEW email for verification
+                $this->otpService->resendOtp(
+                    $data['email'], // send to new email
+                    'email_change_verification',
+                    get_class($user),
+                    $user->id
+                );
 
-        // If email change requested and differs from current, send verification OTP first -- but do NOT update immediately
-        if (isset($profileData['email']) && $profileData['email'] !== $user->email) {
-            $this->otpService->resendOtp(
-                $user->email, // Send to existing email for verification
-                'account_verification',
-                get_class($user),
-                $user->id
+                // Remove email from profile update data - don't update yet
+                unset($data['email']);
+
+                return $this->success([
+                    'message' => 'Email verification code sent to new email address. Please verify to complete the email change.'
+                ], 'Email verification code sent. Please verify your new email address to complete the change.');
+            }
+
+            // Update other profile data (excluding email)
+            $profileData = $data;
+            
+            if(!empty($profileData)) {
+                $this->userProfileRepository->updateOrCreate($user->id, $profileData);
+            }
+
+            // Get updated user with profile
+            $userWithProfile = $this->userProfileRepository->getUserWithProfile($user->id);
+
+            return $this->success([
+                'user' => $userWithProfile,
+            ], 'User profile updated successfully');
+        });
+    }
+
+    /**
+     * Verify email change with OTP and complete the update
+     *
+     * @param array $data
+     * @return array
+     */
+    public function verifyEmailChange(array $data): array
+    {
+        return $this->executeWithTransaction(function () use ($data) {
+            $user = $this->getAuthenticatedUserOrFail(['api'], 'User not authenticated');
+
+            // Verify OTP - this will throw exception if invalid
+            // The OTP record contains the new email in the 'identifier' field
+            $this->otpService->verifyOtp(
+                $data['new_email'],
+                $data['otp_code'],
+                'email_change_verification'
             );
-            // Optionally, you may want to store the new email in a 'pending_email' field instead of updating immediately.
 
-            return $this->success(
-                [],
-                'Email change requested. Verification OTP has been sent to your existing email address.'
-            );
-        }
+            // OTP verified - now update the email
+            $user->email = $data['new_email'];
+            $user->save();
 
-        // Any other profile update (except email change)
-        if (!empty($profileData)) {
-            $this->userProfileRepository->updateOrCreate($user->id, $profileData);
-        }
+            // Get updated user with profile
+            $userWithProfile = $this->userProfileRepository->getUserWithProfile($user->id);
 
-        // Get updated user with profile
-        $userWithProfile = $this->userProfileRepository->getUserWithProfile($user->id);
-
-        return $this->success([
-            'user' => $userWithProfile,
-        ], 'User profile updated successfully');
-    });
- }
+            return $this->success([
+                'user' => $userWithProfile,
+            ], 'Email updated successfully');
+        });
+    }
 
     /**
      * Create initial profile for user

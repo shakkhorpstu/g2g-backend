@@ -5,6 +5,7 @@ namespace Modules\Profile\Http\Controllers;
 use App\Http\Controllers\ApiController;
 use Modules\Profile\Http\Requests\UpdateProfileRequest;
 use Modules\Profile\Http\Requests\CreateProfileRequest;
+use Modules\Profile\Http\Requests\VerifyEmailChangeRequest;
 use Modules\Profile\Services\UserProfileService;
 use Modules\Profile\Services\PswProfileService;
 use Illuminate\Http\Request;
@@ -44,6 +45,19 @@ class ProfileController extends ApiController
     {
         return $this->executeService(
             fn() => $this->userProfileService->updateProfile($request->getSanitizedData())
+        );
+    }
+
+    /**
+     * Verify email change with OTP
+     *
+     * @param VerifyEmailChangeRequest $request
+     * @return JsonResponse
+     */
+    public function verifyEmailChange(VerifyEmailChangeRequest $request): JsonResponse
+    {
+        return $this->executeService(
+            fn() => $this->userProfileService->verifyEmailChange($request->getSanitizedData())
         );
     }
 

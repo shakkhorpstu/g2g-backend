@@ -11,6 +11,7 @@ Route::middleware(['auth:api'])->prefix('v1')->group(function () {
     Route::group(['prefix' => 'profile'], function() {
         Route::get('/', [ProfileController::class, 'index']);
         Route::put('/', [ProfileController::class, 'update']);
+        Route::post('/verify-email-change', [ProfileController::class, 'verifyEmailChange']);
     });
     
     // Notification settings for users
