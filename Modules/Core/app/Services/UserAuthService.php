@@ -252,7 +252,7 @@ class UserAuthService extends BaseService
             }
 
             // Send password reset OTP to email
-            $otpResult = $this->otpService->resendOtp(
+            $this->otpService->resendOtp(
                 $user->email,
                 'password_reset',
                 get_class($user),
@@ -260,8 +260,7 @@ class UserAuthService extends BaseService
             );
 
             return $this->success([
-                'email' => $user->email,
-                'otp_expires_at' => $otpResult['data']['expires_at'] ?? null
+                'email' => $user->email
             ], 'Password reset OTP sent to your email address');
         });
     }
@@ -283,16 +282,12 @@ class UserAuthService extends BaseService
                 $this->fail('User not found with this email address', 404);
             }
 
-            // Verify OTP
-            $otpResult = $this->otpService->verifyOtp(
+            // Verify OTP - this will throw exception if invalid
+            $this->otpService->verifyOtp(
                 $data['email'],
                 $data['otp_code'],
                 'password_reset'
             );
-
-            if (!$otpResult['success']) {
-                $this->fail($otpResult['message'] ?? 'Invalid or expired OTP', 400);
-            }
 
             // Update password
             $this->userRepository->updatePassword($user, $data['new_password']);
