@@ -50,38 +50,42 @@ class UserProfileService extends BaseService
      * @param array $data
      * @return array
      */
-    public function updateProfile(array $data): array
-    {
-        return $this->executeWithTransaction(function () use ($data) {
-            $user = $this->getAuthenticatedUserOrFail(['api'], 'User not authenticated');
+   public function updateProfile(array $data): array
+ {
+    return $this->executeWithTransaction(function () use ($data) {
+        $user = $this->getAuthenticatedUserOrFail(['api'], 'User not authenticated');
 
-            // Update profile data
-            // $profileData = array_intersect_key($data, array_flip(['language_id']));
-            $profileData = $data;
+        $profileData = $data;
 
-            // If email change requested and differs from current, send account verification OTP first
-            if (isset($profileData['email']) && $profileData['email'] !== $user->email) {
-                $this->otpService->resendOtp(
-                    $user->email, // send to existing email for verification
-                    'account_verification',
-                    get_class($user),
-                    $user->id
-                );
-                // Optionally, you may want to store the new email in a 'pending_email' field instead of updating immediately.
-            }
-            
-            if(!empty($profileData)) {
-                $this->userProfileRepository->updateOrCreate($user->id, $profileData);
-            }
+        // If email change requested and differs from current, send verification OTP first -- but do NOT update immediately
+        if (isset($profileData['email']) && $profileData['email'] !== $user->email) {
+            $this->otpService->resendOtp(
+                $user->email, // Send to existing email for verification
+                'account_verification',
+                get_class($user),
+                $user->id
+            );
+            // Optionally, you may want to store the new email in a 'pending_email' field instead of updating immediately.
 
-            // Get updated user with profile
-            $userWithProfile = $this->userProfileRepository->getUserWithProfile($user->id);
+            return $this->success(
+                [],
+                'Email change requested. Verification OTP has been sent to your existing email address.'
+            );
+        }
 
-            return $this->success([
-                'user' => $userWithProfile,
-            ], 'User profile updated successfully');
-        });
-    }
+        // Any other profile update (except email change)
+        if (!empty($profileData)) {
+            $this->userProfileRepository->updateOrCreate($user->id, $profileData);
+        }
+
+        // Get updated user with profile
+        $userWithProfile = $this->userProfileRepository->getUserWithProfile($user->id);
+
+        return $this->success([
+            'user' => $userWithProfile,
+        ], 'User profile updated successfully');
+    });
+ }
 
     /**
      * Create initial profile for user

@@ -7,6 +7,8 @@ use Illuminate\Http\JsonResponse;
 use Modules\Core\Http\Requests\RegisterRequest;
 use Modules\Core\Http\Requests\LoginRequest;
 use Modules\Core\Http\Requests\ChangePasswordRequest;
+use Modules\Core\Http\Requests\ForgotPasswordRequest;
+use Modules\Core\Http\Requests\ResetPasswordRequest;
 use App\Http\Controllers\ApiController;
 
 /**
@@ -99,6 +101,34 @@ class UserAuthController extends ApiController
         return $this->executeService(
             fn() => $this->userAuthService->changePassword($request->getSanitizedData()),
             'Password changed successfully'
+        );
+    }
+
+    /**
+     * Request forgot password OTP
+     *
+     * @param ForgotPasswordRequest $request
+     * @return JsonResponse
+     */
+    public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
+    {
+        return $this->executeService(
+            fn() => $this->userAuthService->forgotPassword($request->getSanitizedData()),
+            'Password reset OTP sent'
+        );
+    }
+
+    /**
+     * Reset password using OTP
+     *
+     * @param ResetPasswordRequest $request
+     * @return JsonResponse
+     */
+    public function resetPassword(ResetPasswordRequest $request): JsonResponse
+    {
+        return $this->executeService(
+            fn() => $this->userAuthService->resetPassword($request->getSanitizedData()),
+            'Password reset successfully'
         );
     }
 }

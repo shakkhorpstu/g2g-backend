@@ -121,7 +121,7 @@ class UserAuthService extends BaseService
             }
 
             // Block login if account not verified by OTP
-            $otpVerification = $this->otpRepository->findByOtpableAndType(
+            $otpVerification = $this->otpRepository->findByOtpableAndTypeVerified(
                 get_class($user),
                 $user->id,
                 'account_verification'
@@ -231,6 +231,78 @@ class UserAuthService extends BaseService
             $this->userRepository->updatePassword($user, $data['new_password']);
 
             return $this->success(null, 'Password changed successfully');
+        });
+    }
+
+    /**
+     * Request forgot password OTP
+     *
+     * @param array $data Email data
+     * @return array
+     * @throws ServiceException
+     */
+    public function forgotPassword(array $data): array
+    {
+        return $this->executeWithTransaction(function () use ($data) {
+            // Find user by email
+            $user = $this->userRepository->findByEmail($data['email']);
+            
+            if (!$user) {
+                $this->fail('User not found with this email address', 404);
+            }
+
+            // Send password reset OTP to email
+            $otpResult = $this->otpService->resendOtp(
+                $user->email,
+                'password_reset',
+                get_class($user),
+                $user->id
+            );
+
+            return $this->success([
+                'email' => $user->email,
+                'otp_expires_at' => $otpResult['data']['expires_at'] ?? null
+            ], 'Password reset OTP sent to your email address');
+        });
+    }
+
+    /**
+     * Reset password using OTP
+     *
+     * @param array $data Reset password data (email, otp_code, new_password)
+     * @return array
+     * @throws ServiceException
+     */
+    public function resetPassword(array $data): array
+    {
+        return $this->executeWithTransaction(function () use ($data) {
+            // Find user by email
+            $user = $this->userRepository->findByEmail($data['email']);
+            
+            if (!$user) {
+                $this->fail('User not found with this email address', 404);
+            }
+
+            // Verify OTP
+            $otpResult = $this->otpService->verifyOtp(
+                $data['email'],
+                $data['otp_code'],
+                'password_reset'
+            );
+
+            if (!$otpResult['success']) {
+                $this->fail($otpResult['message'] ?? 'Invalid or expired OTP', 400);
+            }
+
+            // Update password
+            $this->userRepository->updatePassword($user, $data['new_password']);
+
+            // Revoke all existing tokens for security
+            $user->tokens->each(function ($token) {
+                $token->revoke();
+            });
+
+            return $this->success(null, 'Password reset successfully. Please login with your new password.');
         });
     }
 }

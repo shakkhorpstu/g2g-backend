@@ -52,4 +52,14 @@ class OtpRepository implements OtpRepositoryInterface
     {
         return $otpVerification->update($data);
     }
+
+    public function findByOtpableAndTypeVerified(string $otpableType, int $otpableId, string $type): ?OtpVerification
+   {
+    return OtpVerification::where('otpable_type', $otpableType)
+        ->where('otpable_id', $otpableId)
+        ->where('type', $type)
+        ->where('status', 'verified')
+        ->where('expires_at', '>', now())
+        ->first();
+   }
 }

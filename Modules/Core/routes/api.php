@@ -11,8 +11,11 @@ Route::prefix('v1')->group(function () {
     // Client/User authentication
     Route::post('client-register', [UserAuthController::class, 'register']);
     Route::post('client-login', [UserAuthController::class, 'login']);
-    //client logout
     Route::post('client-logout', [UserAuthController::class, 'logout']);
+    
+    // Forgot & Reset Password
+    Route::post('forgot-password', [UserAuthController::class, 'forgotPassword']);
+    Route::post('reset-password', [UserAuthController::class, 'resetPassword']);
     
     // PSW authentication
     Route::post('psw-register', [PswAuthController::class, 'register']);
