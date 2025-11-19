@@ -10,11 +10,19 @@ class VerifyEmailChangeRequest extends BaseProfileRequest
     public function rules(): array
     {
         return [
-            'new_email' => [
+            'type' => ['required','string','in:email,phone'],
+            'new_value' => [
                 'required',
                 'string',
-                'email',
-                'max:255'
+                'max:255',
+                function($attribute,$value,$fail){
+                    if(request('type')==='email' && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                        $fail('Please provide a valid email address.');
+                    }
+                    if(request('type')==='phone' && !preg_match('/^[\+]?[0-9\s\-\(\)]+$/',$value)) {
+                        $fail('Please provide a valid phone number.');
+                    }
+                }
             ],
             'otp_code' => [
                 'required',
@@ -30,8 +38,9 @@ class VerifyEmailChangeRequest extends BaseProfileRequest
     public function messages(): array
     {
         return array_merge(parent::messages(), [
-            'new_email.required' => 'New email address is required.',
-            'new_email.email' => 'Please provide a valid email address.',
+            'type.required' => 'Verification type is required.',
+            'type.in' => 'Type must be either email or phone.',
+            'new_value.required' => 'New value is required.',
             'otp_code.required' => 'OTP code is required.',
             'otp_code.size' => 'OTP code must be 6 digits.'
         ]);

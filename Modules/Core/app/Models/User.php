@@ -39,7 +39,8 @@ class User extends Authenticatable
         'is_verified',
         'status',
         'last_login_at',
-        'email_verified_at'
+        'email_verified_at',
+        'meta'
     ];
 
     /**
@@ -65,6 +66,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_verified' => 'boolean',
             'status' => 'integer',
+            'meta' => 'array'
         ];
     }
 

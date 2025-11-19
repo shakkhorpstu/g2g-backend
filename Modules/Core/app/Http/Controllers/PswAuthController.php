@@ -4,6 +4,9 @@ namespace Modules\Core\Http\Controllers;
 
 use Modules\Core\Http\Requests\PswRegisterRequest;
 use Modules\Core\Http\Requests\LoginRequest;
+use Modules\Core\Http\Requests\VerifyAccountRequest;
+use Modules\Core\Http\Requests\ForgotPasswordRequest;
+use Modules\Core\Http\Requests\ResetPasswordRequest;
 use Modules\Core\Services\PswAuthService;
 use App\Http\Controllers\ApiController;
 use Illuminate\Http\JsonResponse;
@@ -83,6 +86,36 @@ class PswAuthController extends ApiController
     {
         return $this->executeService(function () {
             return $this->pswAuthService->refresh();
+        });
+    }
+
+    /**
+     * Verify PSW account with OTP
+     */
+    public function verifyAccount(VerifyAccountRequest $request): JsonResponse
+    {
+        return $this->executeService(function () use ($request) {
+            return $this->pswAuthService->verifyAccount($request->validated());
+        });
+    }
+
+    /**
+     * Request forgot password OTP for PSW
+     */
+    public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
+    {
+        return $this->executeService(function () use ($request) {
+            return $this->pswAuthService->forgotPassword($request->validated());
+        });
+    }
+
+    /**
+     * Reset PSW password using OTP
+     */
+    public function resetPassword(ResetPasswordRequest $request): JsonResponse
+    {
+        return $this->executeService(function () use ($request) {
+            return $this->pswAuthService->resetPassword($request->validated());
         });
     }
 }

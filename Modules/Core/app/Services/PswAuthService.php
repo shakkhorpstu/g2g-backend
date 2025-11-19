@@ -202,4 +202,93 @@ class PswAuthService extends BaseService
             return $this->success(null, 'PSW password changed successfully');
         });
     }
+
+    /**
+     * Verify PSW account using OTP and mark as verified
+     *
+     * @param array $data ['email','otp_code']
+     */
+    public function verifyAccount(array $data): array
+    {
+        return $this->executeWithTransaction(function () use ($data) {
+            $psw = $this->pswRepository->findByEmail($data['email']);
+
+            if (!$psw) {
+                $this->fail('PSW not found with this email address', 404);
+            }
+
+            // Verify OTP
+            $this->otpService->verifyOtp(
+                $data['email'],
+                $data['otp_code'],
+                'account_verification'
+            );
+
+            // Mark as verified
+            $psw = $this->pswRepository->update($psw, [
+                'is_verified' => true,
+                'email_verified_at' => now(),
+            ]);
+
+            return $this->success([
+                'psw' => $psw
+            ], 'PSW account verified successfully');
+        });
+    }
+
+    /**
+     * Send password reset OTP to PSW email
+     */
+    public function forgotPassword(array $data): array
+    {
+        return $this->executeWithTransaction(function () use ($data) {
+            $psw = $this->pswRepository->findByEmail($data['email']);
+
+            if (!$psw) {
+                $this->fail('PSW not found with this email address', 404);
+            }
+
+            $this->otpService->resendOtp(
+                $psw->email,
+                'password_reset',
+                get_class($psw),
+                $psw->id
+            );
+
+            return $this->success([
+                'email' => $psw->email
+            ], 'Password reset OTP sent to your email address');
+        });
+    }
+
+    /**
+     * Reset PSW password using OTP
+     */
+    public function resetPassword(array $data): array
+    {
+        return $this->executeWithTransaction(function () use ($data) {
+            $psw = $this->pswRepository->findByEmail($data['email']);
+
+            if (!$psw) {
+                $this->fail('PSW not found with this email address', 404);
+            }
+
+            // Verify OTP
+            $this->otpService->verifyOtp(
+                $data['email'],
+                $data['otp_code'],
+                'password_reset'
+            );
+
+            // Update password
+            $this->pswRepository->updatePassword($psw, $data['new_password']);
+
+            // Revoke all tokens
+            $psw->tokens->each(function ($token) {
+                $token->revoke();
+            });
+
+            return $this->success(null, 'Password reset successfully. Please login with your new password.');
+        });
+    }
 }

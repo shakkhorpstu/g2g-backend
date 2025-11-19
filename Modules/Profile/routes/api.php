@@ -11,7 +11,7 @@ Route::middleware(['auth:api'])->prefix('v1')->group(function () {
     Route::group(['prefix' => 'profile'], function() {
         Route::get('/', [ProfileController::class, 'index']);
         Route::put('/', [ProfileController::class, 'update']);
-        Route::post('/verify-email-change', [ProfileController::class, 'verifyEmailChange']);
+        Route::post('/verify-contact-change', [ProfileController::class, 'verifyContactChange']);
     });
     
     // Notification settings for users
@@ -30,6 +30,7 @@ Route::middleware(['auth:psw-api'])->prefix('v1/psw')->group(function () {
     Route::group(['prefix' => 'profile'], function() {
         Route::get('/', [ProfileController::class, 'pswProfile']);
         Route::put('/', [ProfileController::class, 'updatePswProfile']); 
+        Route::post('/verify-contact-change', [ProfileController::class, 'verifyPswContactChange']);
     });
     
     // Notification settings for PSWs

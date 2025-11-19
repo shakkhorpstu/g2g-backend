@@ -5,6 +5,7 @@ namespace Modules\Core\Services;
 use Modules\Core\Contracts\Repositories\AdminRepositoryInterface;
 use App\Shared\Exceptions\ServiceException;
 use App\Shared\Services\BaseService;
+use Modules\Core\Services\OtpService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
@@ -23,13 +24,22 @@ class AdminAuthService extends BaseService
     protected AdminRepositoryInterface $adminRepository;
 
     /**
+     * OTP service instance
+     *
+     * @var OtpService
+     */
+    protected OtpService $otpService;
+
+    /**
      * AdminAuthService constructor
      *
      * @param AdminRepositoryInterface $adminRepository
+     * @param OtpService $otpService
      */
-    public function __construct(AdminRepositoryInterface $adminRepository)
+    public function __construct(AdminRepositoryInterface $adminRepository, OtpService $otpService)
     {
         $this->adminRepository = $adminRepository;
+        $this->otpService = $otpService;
     }
 
     /**
@@ -170,6 +180,62 @@ class AdminAuthService extends BaseService
             $this->adminRepository->updatePassword($admin, $data['new_password']);
 
             return $this->success(null, 'Admin password changed successfully');
+        });
+    }
+
+    /**
+     * Send password reset OTP to admin email
+     */
+    public function forgotPassword(array $data): array
+    {
+        return $this->executeWithTransaction(function () use ($data) {
+            $admin = $this->adminRepository->findByEmail($data['email']);
+
+            if (!$admin) {
+                $this->fail('Admin not found with this email address', 404);
+            }
+
+            $this->otpService->resendOtp(
+                $admin->email,
+                'password_reset',
+                get_class($admin),
+                $admin->id
+            );
+
+            return $this->success([
+                'email' => $admin->email
+            ], 'Password reset OTP sent to your email address');
+        });
+    }
+
+    /**
+     * Reset admin password using OTP
+     */
+    public function resetPassword(array $data): array
+    {
+        return $this->executeWithTransaction(function () use ($data) {
+            $admin = $this->adminRepository->findByEmail($data['email']);
+
+            if (!$admin) {
+                $this->fail('Admin not found with this email address', 404);
+            }
+
+            // Verify OTP
+            $this->otpService->verifyOtp(
+                $data['email'],
+                $data['otp_code'],
+                'password_reset'
+            );
+
+            // Update password
+            $this->adminRepository->updatePassword($admin, $data['new_password']);
+
+            // Revoke all tokens
+            $admin->tokens->each(function ($token) {
+                $token->revoke();
+            });
+
+            return $this->success(null, 'Password reset successfully. Please login with your new password.');
         });
     }
 }

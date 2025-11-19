@@ -3,6 +3,8 @@
 namespace Modules\Core\Http\Controllers;
 
 use Modules\Core\Http\Requests\AdminLoginRequest;
+use Modules\Core\Http\Requests\ForgotPasswordRequest;
+use Modules\Core\Http\Requests\ResetPasswordRequest;
 use Modules\Core\Services\AdminAuthService;
 use App\Http\Controllers\ApiController;
 use Illuminate\Http\JsonResponse;
@@ -82,6 +84,26 @@ class AdminAuthController extends ApiController
     {
         return $this->executeService(function () {
             return $this->adminAuthService->getProfile();
+        });
+    }
+
+    /**
+     * Request forgot password OTP for admin
+     */
+    public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
+    {
+        return $this->executeService(function () use ($request) {
+            return $this->adminAuthService->forgotPassword($request->validated());
+        });
+    }
+
+    /**
+     * Reset admin password using OTP
+     */
+    public function resetPassword(ResetPasswordRequest $request): JsonResponse
+    {
+        return $this->executeService(function () use ($request) {
+            return $this->adminAuthService->resetPassword($request->validated());
         });
     }
 }

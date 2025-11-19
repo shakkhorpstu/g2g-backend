@@ -4,6 +4,8 @@ namespace Modules\Profile\Services;
 
 use Modules\Profile\Contracts\Repositories\PswProfileRepositoryInterface;
 use App\Shared\Services\BaseService;
+use Modules\Core\Contracts\Repositories\PswRepositoryInterface;
+use Modules\Core\Services\OtpService;
 
 class PswProfileService extends BaseService
 {
@@ -13,15 +15,19 @@ class PswProfileService extends BaseService
      * @var PswProfileRepositoryInterface
      */
     protected PswProfileRepositoryInterface $pswProfileRepository;
+    protected PswRepositoryInterface $pswRepository;
+    protected OtpService $otpService;
 
     /**
      * PswProfileService constructor
      *
      * @param PswProfileRepositoryInterface $pswProfileRepository
      */
-    public function __construct(PswProfileRepositoryInterface $pswProfileRepository)
+    public function __construct(PswProfileRepositoryInterface $pswProfileRepository, PswRepositoryInterface $pswRepository, OtpService $otpService)
     {
         $this->pswProfileRepository = $pswProfileRepository;
+        $this->pswRepository = $pswRepository;
+        $this->otpService = $otpService;
     }
 
     /**
@@ -52,9 +58,40 @@ class PswProfileService extends BaseService
         return $this->executeWithTransaction(function () use ($data) {
             $psw = $this->getAuthenticatedUserOrFail(['psw-api'], 'PSW not authenticated');
 
-            // Update profile data
+            $pendingChanges = [];
+
+            // Email change request
+            if (isset($data['email']) && $data['email'] !== $psw->email) {
+                $this->otpService->resendOtp(
+                    $data['email'],
+                    'email_update',
+                    get_class($psw),
+                    $psw->id
+                );
+                $pendingChanges[] = ['type' => 'email', 'value' => $data['email']];
+                unset($data['email']);
+            }
+
+            // Phone number change request
+            if (isset($data['phone_number']) && $data['phone_number'] !== $psw->phone_number) {
+                $this->otpService->resendOtp(
+                    $data['phone_number'],
+                    'phone_update',
+                    get_class($psw),
+                    $psw->id
+                );
+                $pendingChanges[] = ['type' => 'phone', 'value' => $data['phone_number']];
+                unset($data['phone_number']);
+            }
+
+            if (!empty($pendingChanges)) {
+                return $this->success([
+                    'pending_verifications' => $pendingChanges
+                ], 'Verification OTP sent for pending contact changes. Please verify to complete.');
+            }
+
+            // Update profile data (non-contact fields)
             $profileData = array_intersect_key($data, array_flip(['language_id']));
-            
             if (!empty($profileData)) {
                 $this->pswProfileRepository->updateOrCreate($psw->id, $profileData);
             }
@@ -66,6 +103,35 @@ class PswProfileService extends BaseService
                 'psw' => $pswWithProfile,
                 'profile' => $pswWithProfile->profile
             ], 'PSW profile updated successfully');
+        });
+    }
+
+    public function verifyContactChange(array $data): array
+    {
+        return $this->executeWithTransaction(function () use ($data) {
+            $psw = $this->getAuthenticatedUserOrFail(['psw-api'], 'PSW not authenticated');
+
+            $type = $data['type']; // email or phone
+            $newValue = $data['new_value'];
+            $otpType = $type === 'email' ? 'email_update' : 'phone_update';
+
+            // Verify OTP for the given identifier and type
+            $this->otpService->verifyOtp(
+                $newValue,
+                $data['otp_code'],
+                $otpType
+            );
+
+            // Update PSW main record
+            $update = $type === 'email' ? ['email' => $newValue] : ['phone_number' => $newValue];
+            $psw = $this->pswRepository->update($psw, $update);
+
+            $pswWithProfile = $this->pswProfileRepository->getPswWithProfile($psw->id);
+
+            return $this->success([
+                'psw' => $pswWithProfile,
+                'profile' => $pswWithProfile->profile
+            ], ucfirst($type) . ' updated successfully');
         });
     }
 

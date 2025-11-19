@@ -55,32 +55,44 @@ class UserProfileService extends BaseService
         return $this->executeWithTransaction(function () use ($data) {
             $user = $this->getAuthenticatedUserOrFail(['api'], 'User not authenticated');
 
-            // Handle email change separately with OTP verification
+            $pendingChanges = [];
+
+            // Email change request
             if (isset($data['email']) && $data['email'] !== $user->email) {
-                // Send OTP to NEW email for verification
                 $this->otpService->resendOtp(
-                    $data['email'], // send to new email
-                    'email_change_verification',
+                    $data['email'],
+                    'email_update',
                     get_class($user),
                     $user->id
                 );
-
-                // Remove email from profile update data - don't update yet
+                $pendingChanges[] = ['type' => 'email', 'value' => $data['email']];
                 unset($data['email']);
+            }
 
+            // Phone number change request
+            if (isset($data['phone_number']) && $data['phone_number'] !== $user->phone_number) {
+                $this->otpService->resendOtp(
+                    $data['phone_number'],
+                    'phone_update',
+                    get_class($user),
+                    $user->id
+                );
+                $pendingChanges[] = ['type' => 'phone', 'value' => $data['phone_number']];
+                unset($data['phone_number']);
+            }
+
+            // If any pending changes require verification, return early
+            if (!empty($pendingChanges)) {
                 return $this->success([
-                    'message' => 'Email verification code sent to new email address. Please verify to complete the email change.'
-                ], 'Email verification code sent. Please verify your new email address to complete the change.');
+                    'pending_verifications' => $pendingChanges
+                ], 'Verification OTP sent for pending contact changes. Please verify to complete.');
             }
 
-            // Update other profile data (excluding email)
-            $profileData = $data;
-            
-            if(!empty($profileData)) {
-                $this->userProfileRepository->updateOrCreate($user->id, $profileData);
+            // Update remaining profile data
+            if (!empty($data)) {
+                $this->userProfileRepository->updateOrCreate($user->id, $data);
             }
 
-            // Get updated user with profile
             $userWithProfile = $this->userProfileRepository->getUserWithProfile($user->id);
 
             return $this->success([
@@ -95,29 +107,46 @@ class UserProfileService extends BaseService
      * @param array $data
      * @return array
      */
-    public function verifyEmailChange(array $data): array
+    public function verifyContactChange(array $data): array
     {
         return $this->executeWithTransaction(function () use ($data) {
             $user = $this->getAuthenticatedUserOrFail(['api'], 'User not authenticated');
 
-            // Verify OTP - this will throw exception if invalid
-            // The OTP record contains the new email in the 'identifier' field
+            $type = $data['type']; // email or phone
+            $newValue = $data['new_value'];
+
+            $otpType = $type === 'email' ? 'email_update' : 'phone_update';
+
+            // Verify OTP
             $this->otpService->verifyOtp(
-                $data['new_email'],
+                $newValue,
                 $data['otp_code'],
-                'email_change_verification'
+                $otpType
             );
 
-            // OTP verified - now update the email
-            $user->email = $data['new_email'];
+            // Update user field accordingly
+            if ($type === 'email') {
+                $user->email = $newValue;
+            } else {
+                $user->phone_number = $newValue;
+            }
+
+            // Append meta log entry
+            $meta = $user->meta ?? [];
+            if (!is_array($meta)) { $meta = []; }
+            $meta[] = [
+                'action_type' => $type === 'email' ? 'Email updated' : 'Phone number updated',
+                'value' => $newValue,
+                'timestamp' => now()->toISOString()
+            ];
+            $user->meta = $meta;
             $user->save();
 
-            // Get updated user with profile
             $userWithProfile = $this->userProfileRepository->getUserWithProfile($user->id);
 
             return $this->success([
                 'user' => $userWithProfile,
-            ], 'Email updated successfully');
+            ], ucfirst($type) . ' updated successfully');
         });
     }
 

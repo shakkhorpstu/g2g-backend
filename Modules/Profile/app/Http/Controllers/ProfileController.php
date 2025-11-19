@@ -5,7 +5,7 @@ namespace Modules\Profile\Http\Controllers;
 use App\Http\Controllers\ApiController;
 use Modules\Profile\Http\Requests\UpdateProfileRequest;
 use Modules\Profile\Http\Requests\CreateProfileRequest;
-use Modules\Profile\Http\Requests\VerifyEmailChangeRequest;
+use Modules\Profile\Http\Requests\VerifyEmailChangeRequest; // handles both email & phone (can rename later)
 use Modules\Profile\Services\UserProfileService;
 use Modules\Profile\Services\PswProfileService;
 use Illuminate\Http\Request;
@@ -49,15 +49,15 @@ class ProfileController extends ApiController
     }
 
     /**
-     * Verify email change with OTP
+     * Verify contact (email or phone) change with OTP
      *
      * @param VerifyEmailChangeRequest $request
      * @return JsonResponse
      */
-    public function verifyEmailChange(VerifyEmailChangeRequest $request): JsonResponse
+    public function verifyContactChange(VerifyEmailChangeRequest $request): JsonResponse
     {
         return $this->executeService(
-            fn() => $this->userProfileService->verifyEmailChange($request->getSanitizedData())
+            fn() => $this->userProfileService->verifyContactChange($request->getSanitizedData())
         );
     }
 
@@ -152,6 +152,19 @@ class ProfileController extends ApiController
     {
         return $this->executeService(
             fn() => $this->pswProfileService->updateProfile($request->getSanitizedData())
+        );
+    }
+
+    /**
+     * Verify PSW contact (email or phone) change with OTP
+     *
+     * @param VerifyEmailChangeRequest $request
+     * @return JsonResponse
+     */
+    public function verifyPswContactChange(VerifyEmailChangeRequest $request): JsonResponse
+    {
+        return $this->executeService(
+            fn() => $this->pswProfileService->verifyContactChange($request->getSanitizedData())
         );
     }
 }
