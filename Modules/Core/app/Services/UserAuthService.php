@@ -120,15 +120,10 @@ class UserAuthService extends BaseService
                 $this->fail('Invalid credentials', 401);
             }
 
-            // Block login if account not verified by OTP
-            $otpVerification = $this->otpRepository->findByOtpableAndTypeVerified(
-                get_class($user),
-                $user->id,
-                'account_verification'
-            );
-            if (!$otpVerification || !$otpVerification->isVerified()) {
+            // Block login if account not verified on user record
+            if (!(bool) $user->is_verified) {
                 $this->fail(
-                    'Account not verified. Please verify your email with the OTP sent during registration.',
+                    'Account not verified. Please verify your email to continue.',
                     403,
                     [
                         'requires_verification' => true,
@@ -298,6 +293,39 @@ class UserAuthService extends BaseService
             });
 
             return $this->success(null, 'Password reset successfully. Please login with your new password.');
+        });
+    }
+
+    /**
+     * Verify account using OTP and mark user as verified
+     *
+     * @param array $data ['email','otp_code']
+     * @return array
+     * @throws ServiceException
+     */
+    public function verifyAccount(array $data): array
+    {
+        return $this->executeWithTransaction(function () use ($data) {
+            // Find user by email
+            $user = $this->userRepository->findByEmail($data['email']);
+            
+            if (!$user) {
+                $this->fail('User not found with this email address', 404);
+            }
+
+            // Verify OTP - will throw on failure
+            $this->otpService->verifyOtp(
+                $data['email'],
+                $data['otp_code'],
+                'account_verification'
+            );
+
+            // Mark user as verified
+            $user = $this->userRepository->markEmailAsVerified($user);
+
+            return $this->success([
+                'user' => $user
+            ], 'Account verified successfully');
         });
     }
 }

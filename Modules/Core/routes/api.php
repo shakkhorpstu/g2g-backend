@@ -11,6 +11,7 @@ Route::prefix('v1')->group(function () {
     // Client/User authentication
     Route::post('client-register', [UserAuthController::class, 'register']);
     Route::post('client-login', [UserAuthController::class, 'login']);
+    Route::post('verify-account', [UserAuthController::class, 'verifyAccount']);
     Route::post('client-logout', [UserAuthController::class, 'logout']);
     
     // Forgot & Reset Password
