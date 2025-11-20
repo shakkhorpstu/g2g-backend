@@ -40,7 +40,7 @@ interface PswProfileRepositoryInterface
      * @param array $data
      * @return PswProfile
      */
-    public function updateOrCreate(int $pswId, array $data): PswProfile;
+    public function updateOrCreate(int $pswId, array $data): Psw;
 
     /**
      * Delete PSW profile

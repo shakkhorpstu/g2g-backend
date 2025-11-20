@@ -84,16 +84,16 @@ class PswProfileService extends BaseService
                 unset($data['phone_number']);
             }
 
+            // If any pending changes require verification, return early
             if (!empty($pendingChanges)) {
                 return $this->success([
                     'pending_verifications' => $pendingChanges
                 ], 'Verification OTP sent for pending contact changes. Please verify to complete.');
             }
 
-            // Update profile data (non-contact fields)
-            $profileData = array_intersect_key($data, array_flip(['language_id']));
-            if (!empty($profileData)) {
-                $this->pswProfileRepository->updateOrCreate($psw->id, $profileData);
+            // Update remaining profile data
+            if (!empty($data)) {
+                $this->pswProfileRepository->updateOrCreate($psw->id, $data);
             }
 
             // Get updated PSW with profile

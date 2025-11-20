@@ -58,10 +58,10 @@ class PswProfileRepository implements PswProfileRepositoryInterface
      * @param array $data
      * @return PswProfile
      */
-    public function updateOrCreate(int $pswId, array $data): PswProfile
+    public function updateOrCreate(int $pswId, array $data): Psw
     {
-        return PswProfile::updateOrCreate(
-            ['psw_id' => $pswId],
+        return Psw::updateOrCreate(
+            ['id' => $pswId],
             $data
         );
     }

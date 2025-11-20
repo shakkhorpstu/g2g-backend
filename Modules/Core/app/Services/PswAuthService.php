@@ -106,6 +106,18 @@ class PswAuthService extends BaseService
                 $this->fail('Invalid credentials', 401);
             }
 
+            // Block login if account not verified
+            if (!(bool) $psw->is_verified) {
+                $this->fail(
+                    'Account not verified. Please verify your email to continue.',
+                    403,
+                    [
+                        'requires_verification' => true,
+                        'email' => $psw->email
+                    ]
+                );
+            }
+
             // Update last login
             $this->pswRepository->updateLastLogin($psw);
 
