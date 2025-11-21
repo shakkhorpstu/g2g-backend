@@ -5,6 +5,8 @@ use Modules\Core\Http\Controllers\UserAuthController;
 use Modules\Core\Http\Controllers\PswAuthController;
 use Modules\Core\Http\Controllers\AdminAuthController;
 use Modules\Core\Http\Controllers\OtpController;
+use Modules\Core\Http\Controllers\AdminServiceCategoryController;
+use Modules\Core\Http\Controllers\ServiceCategoryController;
 
 // Public authentication routes
 Route::prefix('v1')->group(function () {
@@ -37,6 +39,16 @@ Route::prefix('v1')->group(function () {
     // OTP routes
     Route::post('resend-otp', [OtpController::class, 'resendOtp']);
     Route::post('verify-otp', [OtpController::class, 'verifyOtp']);
+
+    // Shared service categories list & details (requires auth for respective guards)
+    Route::middleware('auth:api')->group(function() {
+        Route::get('service-categories', [ServiceCategoryController::class, 'list']);
+        Route::get('service-categories/{id}', [ServiceCategoryController::class, 'show']);
+    });
+    Route::middleware('auth:psw-api')->group(function() {
+        Route::get('psw/service-categories', [ServiceCategoryController::class, 'list']);
+        Route::get('psw/service-categories/{id}', [ServiceCategoryController::class, 'show']);
+    });
 });
 
 // Protected authentication routes - Client/User
@@ -55,4 +67,13 @@ Route::middleware(['auth:psw-api'])->prefix('v1')->group(function () {
 Route::middleware(['auth:admin-api'])->prefix('v1')->group(function () {
     Route::post('admin-logout', [AdminAuthController::class, 'logout']);
     Route::post('admin-refresh', [AdminAuthController::class, 'refresh']);
+
+    // Admin service categories CRUD
+    Route::prefix('admin/service-categories')->group(function () {
+        Route::get('/', [AdminServiceCategoryController::class, 'index']);
+        Route::post('/', [AdminServiceCategoryController::class, 'store']);
+        Route::get('/{id}', [AdminServiceCategoryController::class, 'show']);
+        Route::put('/{id}', [AdminServiceCategoryController::class, 'update']);
+        Route::delete('/{id}', [AdminServiceCategoryController::class, 'destroy']);
+    });
 });
