@@ -1,0 +1,24 @@
+{
+    "name": "modules/payment",
+    "type": "laravel-module",
+    "description": "Payment module for card management",
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\Payment\\Providers\\PaymentServiceProvider"
+            ]
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Payment\\": "app/",
+            "Modules\\Payment\\Database\\Factories\\": "database/factories/",
+            "Modules\\Payment\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Payment\\Tests\\": "tests/"
+        }
+    }
+}
