@@ -6,7 +6,6 @@ use Modules\Core\Models\ServiceCategory;
 
 interface ServiceCategoryRepositoryInterface
 {
-    public function paginate(int $perPage = 15): mixed;
     public function all(): mixed;
     public function find(int $id): ?ServiceCategory;
     public function create(array $data): ServiceCategory;

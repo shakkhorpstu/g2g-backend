@@ -40,15 +40,9 @@ Route::prefix('v1')->group(function () {
     Route::post('resend-otp', [OtpController::class, 'resendOtp']);
     Route::post('verify-otp', [OtpController::class, 'verifyOtp']);
 
-    // Shared service categories list & details (requires auth for respective guards)
-    Route::middleware('auth:api')->group(function() {
-        Route::get('service-categories', [ServiceCategoryController::class, 'list']);
-        Route::get('service-categories/{id}', [ServiceCategoryController::class, 'show']);
-    });
-    Route::middleware('auth:psw-api')->group(function() {
-        Route::get('psw/service-categories', [ServiceCategoryController::class, 'list']);
-        Route::get('psw/service-categories/{id}', [ServiceCategoryController::class, 'show']);
-    });
+    // Public service categories (no auth required)
+    Route::get('service-categories', [ServiceCategoryController::class, 'list']);
+    Route::get('service-categories/{id}', [ServiceCategoryController::class, 'show']);
 });
 
 // Protected authentication routes - Client/User

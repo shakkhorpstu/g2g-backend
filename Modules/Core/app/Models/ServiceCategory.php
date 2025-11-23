@@ -22,10 +22,10 @@ class ServiceCategory extends Model
     ];
 
     protected $casts = [
-        'price' => 'float',
-        'base_fare' => 'float',
-        'ride_charge' => 'float',
-        'time_charge' => 'float',
-        'platform_fee' => 'float',
+        'price' => 'double',
+        'base_fare' => 'double',
+        'ride_charge' => 'double',
+        'time_charge' => 'double',
+        'platform_fee' => 'double',
     ];
 }

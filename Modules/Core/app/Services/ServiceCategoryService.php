@@ -16,25 +16,11 @@ class ServiceCategoryService extends BaseService
         $this->repository = $repository;
     }
 
-    // Admin listing with pagination
-    public function paginate(int $perPage = 15): array
-    {
-        $paginator = $this->repository->paginate($perPage);
-        return $this->success([
-            'data' => $paginator->items(),
-            'pagination' => [
-                'current_page' => $paginator->currentPage(),
-                'total' => $paginator->total(),
-                'per_page' => $paginator->perPage(),
-            ]
-        ], 'Service categories retrieved successfully');
-    }
-
-    // Shared list (no pagination)
+    // Admin listing
     public function listAll(): array
     {
         $categories = $this->repository->all();
-        return $this->success($categories, 'Service categories list');
+        return $this->success($categories, 'Service categories retrieved successfully');
     }
 
     public function show(int $id): array

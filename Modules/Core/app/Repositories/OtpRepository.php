@@ -4,6 +4,7 @@ namespace Modules\Core\Repositories;
 
 use Modules\Core\Contracts\Repositories\OtpRepositoryInterface;
 use Modules\Core\Models\OtpVerification;
+use Illuminate\Support\Facades\DB;
 
 class OtpRepository implements OtpRepositoryInterface
 {
@@ -53,13 +54,14 @@ class OtpRepository implements OtpRepositoryInterface
         return $otpVerification->update($data);
     }
 
-    public function findByOtpableAndTypeVerified(string $otpableType, int $otpableId, string $type): ?OtpVerification
-   {
-    return OtpVerification::where('otpable_type', $otpableType)
-        ->where('otpable_id', $otpableId)
-        ->where('type', $type)
-        ->where('status', 'verified')
-        ->where('expires_at', '>', now())
-        ->first();
-   }
+   public function findByOtpableAndTypeVerified(string $otpableType, int $otpableId, string $type): ?OtpVerification
+    {
+        return DB::table('otp_verifications')
+            ->where('otpable_type', $otpableType)
+            ->where('otpable_id', $otpableId)
+            ->where('type', $type)
+            ->where('status', 'verified')
+            ->where('expires_at', '>', now())
+            ->first();
+    }
 }

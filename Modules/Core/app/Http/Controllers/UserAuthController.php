@@ -115,7 +115,7 @@ class UserAuthController extends ApiController
     {
         return $this->executeService(
             fn() => $this->userAuthService->verifyAccount($request->getSanitizedData()),
-            'Account verified successfully'
+            'Congratulations! Your account has been verified. You may now access all features'
         );
     }
 
@@ -129,7 +129,7 @@ class UserAuthController extends ApiController
     {
         return $this->executeService(
             fn() => $this->userAuthService->forgotPassword($request->getSanitizedData()),
-            'Password reset OTP sent'
+            'Password reset code sent. Please check your email.'
         );
     }
 

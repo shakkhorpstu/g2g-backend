@@ -7,10 +7,6 @@ use Modules\Core\Models\ServiceCategory;
 
 class ServiceCategoryRepository implements ServiceCategoryRepositoryInterface
 {
-    public function paginate(int $perPage = 15): mixed
-    {
-        return ServiceCategory::orderByDesc('id')->paginate($perPage);
-    }
 
     public function all(): mixed
     {
