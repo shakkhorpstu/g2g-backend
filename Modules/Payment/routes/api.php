@@ -18,6 +18,17 @@ Route::middleware(['auth:api'])->prefix('v1')->group(function () {
         Route::get('/{payment_method_id}/transactions/{transaction_id}', [\Modules\Payment\Http\Controllers\ClientCardTransactionController::class, 'show']);
         Route::post('/{payment_method_id}/transactions', [\Modules\Payment\Http\Controllers\ClientCardTransactionController::class, 'store']);
     });
+
+    // Google Pay
+    Route::post('/pay/google', [\Modules\Payment\Http\Controllers\ClientGooglePayController::class, 'store']);
+    Route::post('/pay/google/confirm', [\Modules\Payment\Http\Controllers\ClientGooglePayController::class, 'confirm']);
+
+    // Transactions (Google Pay & Card persisted stripe_transactions)
+    Route::group(['prefix' => 'transactions'], function() {
+        Route::get('/', [\Modules\Payment\Http\Controllers\ClientTransactionController::class, 'index']);
+        Route::get('/{id}', [\Modules\Payment\Http\Controllers\ClientTransactionController::class, 'show']);
+        Route::post('/{id}/refund', [\Modules\Payment\Http\Controllers\ClientTransactionController::class, 'refund']);
+    });
 });
 
 // ============== PSW ROUTES ==============
@@ -34,5 +45,16 @@ Route::middleware(['auth:psw-api'])->prefix('v1/psw')->group(function () {
         Route::get('/{payment_method_id}/transactions', [\Modules\Payment\Http\Controllers\PswCardTransactionController::class, 'index']);
         Route::get('/{payment_method_id}/transactions/{transaction_id}', [\Modules\Payment\Http\Controllers\PswCardTransactionController::class, 'show']);
         Route::post('/{payment_method_id}/transactions', [\Modules\Payment\Http\Controllers\PswCardTransactionController::class, 'store']);
+    });
+
+    // Google Pay
+    Route::post('/pay/google', [\Modules\Payment\Http\Controllers\PswGooglePayController::class, 'store']);
+    Route::post('/pay/google/confirm', [\Modules\Payment\Http\Controllers\PswGooglePayController::class, 'confirm']);
+
+    // Transactions (Google Pay & Card persisted stripe_transactions)
+    Route::group(['prefix' => 'transactions'], function() {
+        Route::get('/', [\Modules\Payment\Http\Controllers\PswTransactionController::class, 'index']);
+        Route::get('/{id}', [\Modules\Payment\Http\Controllers\PswTransactionController::class, 'show']);
+        Route::post('/{id}/refund', [\Modules\Payment\Http\Controllers\PswTransactionController::class, 'refund']);
     });
 });
