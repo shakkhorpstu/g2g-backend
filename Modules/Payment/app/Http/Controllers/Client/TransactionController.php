@@ -1,12 +1,12 @@
 <?php
 
-namespace Modules\Payment\Http\Controllers;
+namespace Modules\Payment\Http\Controllers\Client;
 
 use Illuminate\Routing\Controller;
 use Modules\Payment\Services\StripeTransactionService;
 use Illuminate\Http\Request;
 
-class ClientTransactionController extends Controller
+class TransactionController extends Controller
 {
     public function __construct(protected StripeTransactionService $service) {}
 

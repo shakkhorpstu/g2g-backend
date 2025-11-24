@@ -1,12 +1,12 @@
 <?php
 
-namespace Modules\Payment\Http\Controllers;
+namespace Modules\Payment\Http\Controllers\Client;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Payment\Services\GooglePayService;
 
-class PswGooglePayController extends Controller
+class GooglePayController extends Controller
 {
     public function __construct(protected GooglePayService $service) {}
 
@@ -18,7 +18,7 @@ class PswGooglePayController extends Controller
             'currency' => 'required|string|size:3',
             'description' => 'nullable|string',
         ]);
-        return response()->json($this->service->chargeViaGooglePay($validated, 'psw'), 201);
+        return response()->json($this->service->chargeViaGooglePay($validated, 'client'), 201);
     }
 
     public function confirm(Request $request)
@@ -26,6 +26,6 @@ class PswGooglePayController extends Controller
         $validated = $request->validate([
             'payment_intent_id' => 'required|string'
         ]);
-        return response()->json($this->service->finalizePaymentIntent($validated['payment_intent_id'], 'psw'));
+        return response()->json($this->service->finalizePaymentIntent($validated['payment_intent_id'], 'client'));
     }
 }

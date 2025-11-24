@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Payment\Services;
+namespace Modules\Payment\Services\Client;
 
 use App\Shared\Services\BaseService;
 use Illuminate\Support\Facades\Auth;
@@ -10,7 +10,7 @@ use Stripe\Customer;
 use Stripe\PaymentMethod;
 use Stripe\Exception\ApiErrorException;
 
-class ClientCardService extends BaseService
+class CardService extends BaseService
 {
     protected function initStripe(): void
     {

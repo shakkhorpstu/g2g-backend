@@ -1,12 +1,12 @@
 <?php
 
-namespace Modules\Payment\Services;
+namespace Modules\Payment\Services\PSW;
 
 use Stripe\Stripe;
 use Stripe\PaymentIntent;
 use Stripe\Charge;
 
-class PswCardTransactionService
+class CardTransactionService
 {
     public function list($payment_method_id)
     {

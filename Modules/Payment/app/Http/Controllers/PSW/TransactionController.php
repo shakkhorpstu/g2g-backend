@@ -1,11 +1,11 @@
 <?php
 
-namespace Modules\Payment\Http\Controllers;
+namespace Modules\Payment\Http\Controllers\PSW;
 
 use Illuminate\Routing\Controller;
 use Modules\Payment\Services\StripeTransactionService;
 
-class PswTransactionController extends Controller
+class TransactionController extends Controller
 {
     public function __construct(protected StripeTransactionService $service) {}
 

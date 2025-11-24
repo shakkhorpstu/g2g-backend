@@ -1,16 +1,16 @@
 <?php
 
-namespace Modules\Payment\Http\Controllers;
+namespace Modules\Payment\Http\Controllers\Client;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Modules\Payment\Services\PswCardTransactionService;
+use Modules\Payment\Services\Client\CardTransactionService;
 
-class PswCardTransactionController extends Controller
+class CardTransactionController extends Controller
 {
     protected $service;
 
-    public function __construct(PswCardTransactionService $service)
+    public function __construct(CardTransactionService $service)
     {
         $this->service = $service;
     }

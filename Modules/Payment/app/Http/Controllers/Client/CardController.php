@@ -1,18 +1,18 @@
 <?php
 
-namespace Modules\Payment\Http\Controllers;
+namespace Modules\Payment\Http\Controllers\Client;
 
 use App\Http\Controllers\ApiController;
 use Illuminate\Http\JsonResponse;
-use Modules\Payment\Http\Requests\StorePswCardRequest;
-use Modules\Payment\Http\Requests\UpdatePswCardRequest;
-use Modules\Payment\Services\PswCardService;
+use Modules\Payment\Http\Requests\StoreClientCardRequest;
+use Modules\Payment\Http\Requests\UpdateClientCardRequest;
+use Modules\Payment\Services\Client\CardService;
 
-class PswCardController extends ApiController
+class CardController extends ApiController
 {
-    protected PswCardService $service;
+    protected CardService $service;
 
-    public function __construct(PswCardService $service)
+    public function __construct(CardService $service)
     {
         parent::__construct();
         $this->service = $service;
@@ -23,7 +23,7 @@ class PswCardController extends ApiController
         return $this->executeService(fn() => $this->service->index());
     }
 
-    public function store(StorePswCardRequest $request): JsonResponse
+    public function store(StoreClientCardRequest $request): JsonResponse
     {
         return $this->executeServiceForCreation(fn() => $this->service->store($request->validated()));
     }
@@ -33,7 +33,7 @@ class PswCardController extends ApiController
         return $this->executeService(fn() => $this->service->show($id));
     }
 
-    public function update(UpdatePswCardRequest $request, string $id): JsonResponse
+    public function update(UpdateClientCardRequest $request, string $id): JsonResponse
     {
         return $this->executeService(fn() => $this->service->update($id, $request->validated()));
     }
