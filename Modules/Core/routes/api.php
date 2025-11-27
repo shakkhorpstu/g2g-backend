@@ -7,6 +7,7 @@ use Modules\Core\Http\Controllers\AdminAuthController;
 use Modules\Core\Http\Controllers\OtpController;
 use Modules\Core\Http\Controllers\AdminServiceCategoryController;
 use Modules\Core\Http\Controllers\ServiceCategoryController;
+use Modules\Core\Http\Controllers\AddressController;
 
 // Public authentication routes
 Route::prefix('v1')->group(function () {
@@ -49,12 +50,34 @@ Route::prefix('v1')->group(function () {
 Route::middleware(['auth:api'])->prefix('v1')->group(function () {
     Route::post('client-logout', [UserAuthController::class, 'logout']);
     Route::post('client-refresh', [UserAuthController::class, 'refresh']);
+
+    // User addresses
+    Route::prefix('addresses')->group(function () {
+        Route::get('/', [AddressController::class, 'index']);
+        Route::post('/', [AddressController::class, 'store']);
+        Route::get('/default', [AddressController::class, 'getDefault']);
+        Route::get('/{id}', [AddressController::class, 'show']);
+        Route::put('/{id}', [AddressController::class, 'update']);
+        Route::delete('/{id}', [AddressController::class, 'destroy']);
+        Route::post('/{id}/set-default', [AddressController::class, 'setDefault']);
+    });
 });
 
 // Protected authentication routes - PSW
 Route::middleware(['auth:psw-api'])->prefix('v1')->group(function () {
     Route::post('psw-logout', [PswAuthController::class, 'logout']);
     Route::post('psw-refresh', [PswAuthController::class, 'refresh']);
+
+    // PSW addresses
+    Route::prefix('psw/addresses')->group(function () {
+        Route::get('/', [AddressController::class, 'index']);
+        Route::post('/', [AddressController::class, 'store']);
+        Route::get('/default', [AddressController::class, 'getDefault']);
+        Route::get('/{id}', [AddressController::class, 'show']);
+        Route::put('/{id}', [AddressController::class, 'update']);
+        Route::delete('/{id}', [AddressController::class, 'destroy']);
+        Route::post('/{id}/set-default', [AddressController::class, 'setDefault']);
+    });
 });
 
 // Protected authentication routes - Admin
