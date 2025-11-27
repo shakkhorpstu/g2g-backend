@@ -3,6 +3,7 @@
 namespace Modules\Core\Services;
 
 use Modules\Core\Contracts\Repositories\PswRepositoryInterface;
+use Modules\Core\Contracts\Repositories\AddressRepositoryInterface;
 use App\Shared\Exceptions\ServiceException;
 use App\Shared\Services\BaseService;
 use Modules\Core\Events\PswRegistered;
@@ -32,15 +33,27 @@ class PswAuthService extends BaseService
     protected OtpService $otpService;
 
     /**
+     * Address repository instance
+     *
+     * @var AddressRepositoryInterface
+     */
+    protected AddressRepositoryInterface $addressRepository;
+
+    /**
      * PswAuthService constructor
      *
      * @param PswRepositoryInterface $pswRepository
      * @param OtpService $otpService
+     * @param AddressRepositoryInterface $addressRepository
      */
-    public function __construct(PswRepositoryInterface $pswRepository, OtpService $otpService)
-    {
+    public function __construct(
+        PswRepositoryInterface $pswRepository,
+        OtpService $otpService,
+        AddressRepositoryInterface $addressRepository
+    ) {
         $this->pswRepository = $pswRepository;
         $this->otpService = $otpService;
+        $this->addressRepository = $addressRepository;
     }
 
     /**
@@ -64,6 +77,9 @@ class PswAuthService extends BaseService
             // Fire PSW registered event (Profile module will handle profile creation)
             event(new PswRegistered($psw, $data));
 
+            // Create default address with static data
+            $this->createDefaultAddress($psw);
+
             // Send account verification OTP to email
             $this->otpService->resendOtp(
                 $psw->email,
@@ -82,6 +98,32 @@ class PswAuthService extends BaseService
                 'message' => 'Please verify your email with the OTP sent to your email address'
             ], 'PSW registered successfully. Verification OTP sent to email.', 201);
         });
+    }
+
+    /**
+     * Create default address for newly registered PSW
+     *
+     * @param mixed $psw
+     * @return void
+     */
+    protected function createDefaultAddress($psw): void
+    {
+        // Static default address data (will be replaced with form data later)
+        $addressData = [
+            'addressable_type' => get_class($psw),
+            'addressable_id' => $psw->id,
+            'label' => 'HOME',
+            'address_line' => '123 Default Street',
+            'city' => 'Default City',
+            'province' => 'Default Province',
+            'postal_code' => '00000',
+            'country_id' => 1, // Assuming country with ID 1 exists
+            'is_default' => true,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+
+        $this->addressRepository->create($addressData);
     }
 
     /**
