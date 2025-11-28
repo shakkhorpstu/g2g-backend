@@ -6,8 +6,10 @@ use App\Http\Controllers\ApiController;
 use Modules\Profile\Http\Requests\UpdateProfileRequest;
 use Modules\Profile\Http\Requests\CreateProfileRequest;
 use Modules\Profile\Http\Requests\VerifyEmailChangeRequest; // handles both email & phone (can rename later)
+use Modules\Profile\Http\Requests\SetLanguageRequest;
 use Modules\Profile\Services\UserProfileService;
 use Modules\Profile\Services\PswProfileService;
+use Modules\Profile\Services\ProfileLanguageService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
@@ -15,12 +17,17 @@ class ProfileController extends ApiController
 {
     protected UserProfileService $userProfileService;
     protected PswProfileService $pswProfileService;
+    protected ProfileLanguageService $languageService;
 
-    public function __construct(UserProfileService $userProfileService, PswProfileService $pswProfileService)
-    {
+    public function __construct(
+        UserProfileService $userProfileService,
+        PswProfileService $pswProfileService,
+        ProfileLanguageService $languageService
+    ) {
         parent::__construct();
         $this->userProfileService = $userProfileService;
         $this->pswProfileService = $pswProfileService;
+        $this->languageService = $languageService;
     }
 
     /**
@@ -165,6 +172,34 @@ class ProfileController extends ApiController
     {
         return $this->executeService(
             fn() => $this->pswProfileService->verifyContactChange($request->getSanitizedData())
+        );
+    }
+
+    /**
+     * Get language preference for user
+     *
+     * @return JsonResponse
+     */
+    public function getLanguage(): JsonResponse
+    {
+        return $this->executeService(
+            fn() => $this->languageService->getLanguage(),
+            'Language retrieved successfully'
+        );
+    }
+
+    /**
+     * Set language preference for user
+     *
+     * @param SetLanguageRequest $request
+     * @return JsonResponse
+     */
+    public function setLanguage(SetLanguageRequest $request): JsonResponse
+    {
+        $languages = $request->input('languages', []);
+        return $this->executeService(
+            fn() => $this->languageService->setLanguage($languages),
+            'Language updated successfully'
         );
     }
 }

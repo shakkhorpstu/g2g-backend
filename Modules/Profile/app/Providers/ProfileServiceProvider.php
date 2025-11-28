@@ -46,6 +46,12 @@ class ProfileServiceProvider extends ServiceProvider
             \Modules\Profile\Contracts\Repositories\NotificationSettingRepositoryInterface::class,
             \Modules\Profile\Repositories\NotificationSettingRepository::class
         );
+        
+        // Bind profile language repository interface
+        $this->app->bind(
+            \Modules\Profile\Contracts\Repositories\ProfileLanguageRepositoryInterface::class,
+            \Modules\Profile\Repositories\ProfileLanguageRepository::class
+        );
     }
 
     /**

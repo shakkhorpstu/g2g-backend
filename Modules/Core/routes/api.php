@@ -8,6 +8,7 @@ use Modules\Core\Http\Controllers\OtpController;
 use Modules\Core\Http\Controllers\AdminServiceCategoryController;
 use Modules\Core\Http\Controllers\ServiceCategoryController;
 use Modules\Core\Http\Controllers\AddressController;
+use Modules\Core\Http\Controllers\ResourceController;
 
 // Public authentication routes
 Route::prefix('v1')->group(function () {
@@ -44,6 +45,8 @@ Route::prefix('v1')->group(function () {
     // Public service categories (no auth required)
     Route::get('service-categories', [ServiceCategoryController::class, 'list']);
     Route::get('service-categories/{id}', [ServiceCategoryController::class, 'show']);
+    // Languages list from config
+    Route::get('languages', [ResourceController::class, 'languages']);
 });
 
 // Protected authentication routes - Client/User
