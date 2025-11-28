@@ -2,7 +2,7 @@
 
 namespace Modules\Profile\Contracts\Repositories;
 
-use Modules\Core\Models\PswProfile;
+use Modules\Profile\Models\PswProfile;
 use Modules\Core\Models\Psw;
 
 interface PswProfileRepositoryInterface

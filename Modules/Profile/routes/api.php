@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Profile\Http\Controllers\ProfileController;
+use Modules\Profile\Http\Controllers\UserProfileController;
+use Modules\Profile\Http\Controllers\PswProfileController;
 use Modules\Profile\Http\Controllers\NotificationController;
 use Modules\Profile\Http\Controllers\PasswordController;
 
@@ -9,9 +11,9 @@ use Modules\Profile\Http\Controllers\PasswordController;
 Route::middleware(['auth:api'])->prefix('v1')->group(function () {
     // Profile
     Route::group(['prefix' => 'profile'], function() {
-        Route::get('/', [ProfileController::class, 'index']);
-        Route::put('/', [ProfileController::class, 'update']);
-        Route::post('/verify-contact-change', [ProfileController::class, 'verifyContactChange']);
+        Route::get('/', [UserProfileController::class, 'index']);
+        Route::put('/', [UserProfileController::class, 'update']);
+        Route::post('/verify-contact-change', [UserProfileController::class, 'verifyContactChange']);
     });
     
     // Language preference
@@ -32,11 +34,13 @@ Route::middleware(['auth:api'])->prefix('v1')->group(function () {
 Route::middleware(['auth:psw-api'])->prefix('v1/psw')->group(function () {
     // Profile
     Route::group(['prefix' => 'profile'], function() {
-        Route::get('/', [ProfileController::class, 'pswProfile']);
-        Route::put('/', [ProfileController::class, 'updatePswProfile']); 
-        Route::post('/verify-contact-change', [ProfileController::class, 'verifyPswContactChange']);
+        Route::get('/', [PswProfileController::class, 'show']);
+        Route::put('/', [PswProfileController::class, 'update']); 
+        Route::post('/verify-contact-change', [PswProfileController::class, 'verifyContactChange']);
+        Route::put('/availability', [PswProfileController::class, 'setAvailability']);
+        Route::put('/rates', [PswProfileController::class, 'setRates']);
     });
-    
+
     // Language preference
     Route::get('language', [ProfileController::class, 'getLanguage']);
     Route::post('language', [ProfileController::class, 'setLanguage']);

@@ -3,7 +3,7 @@
 namespace Modules\Profile\Repositories;
 
 use Modules\Profile\Contracts\Repositories\PswProfileRepositoryInterface;
-use Modules\Core\Models\PswProfile;
+use Modules\Profile\Models\PswProfile;
 use Modules\Core\Models\Psw;
 
 class PswProfileRepository implements PswProfileRepositoryInterface
