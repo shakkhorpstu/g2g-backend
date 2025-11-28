@@ -3,6 +3,7 @@
 namespace Modules\Core\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Shared\Traits\HasAddresses;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -15,7 +16,7 @@ use Laravel\Cashier\Billable;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Modules\Core\Database\Factories\UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable, Billable;
+    use HasApiTokens, HasFactory, Notifiable, Billable, HasAddresses;
 
     /**
      * User status constants

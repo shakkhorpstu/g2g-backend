@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Models;
 
+use App\Shared\Traits\HasAddresses;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -14,7 +15,7 @@ use Laravel\Cashier\Billable;
 class Psw extends Authenticatable
 {
     /** @use HasFactory<\Modules\Core\Database\Factories\PswFactory> */
-    use HasApiTokens, HasFactory, Notifiable, Billable;
+    use HasApiTokens, HasFactory, Notifiable, Billable, HasAddresses;
 
     /**
      * The table associated with the model.

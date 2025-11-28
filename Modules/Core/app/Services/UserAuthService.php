@@ -4,6 +4,7 @@ namespace Modules\Core\Services;
 
 use Modules\Core\Contracts\Repositories\UserRepositoryInterface;
 use Modules\Core\Contracts\Repositories\OtpRepositoryInterface;
+use Modules\Core\Contracts\Repositories\AddressRepositoryInterface;
 use App\Shared\Exceptions\ServiceException;
 use App\Shared\Services\BaseService;
 use Modules\Core\Events\UserRegistered;
@@ -40,17 +41,30 @@ class UserAuthService extends BaseService
     protected OtpRepositoryInterface $otpRepository;
 
     /**
+     * Address repository instance
+     *
+     * @var AddressRepositoryInterface
+     */
+    protected AddressRepositoryInterface $addressRepository;
+
+    /**
      * UserAuthService constructor
      *
      * @param UserRepositoryInterface $userRepository
      * @param OtpService $otpService
      * @param OtpRepositoryInterface $otpRepository
+     * @param AddressRepositoryInterface $addressRepository
      */
-    public function __construct(UserRepositoryInterface $userRepository, OtpService $otpService, OtpRepositoryInterface $otpRepository)
-    {
+    public function __construct(
+        UserRepositoryInterface $userRepository,
+        OtpService $otpService,
+        OtpRepositoryInterface $otpRepository,
+        AddressRepositoryInterface $addressRepository
+    ) {
         $this->userRepository = $userRepository;
         $this->otpService = $otpService;
         $this->otpRepository = $otpRepository;
+        $this->addressRepository = $addressRepository;
     }
 
     /**
@@ -79,6 +93,9 @@ class UserAuthService extends BaseService
             // Fire user registered event (Profile module will handle profile creation)
             event(new UserRegistered($user, $data));
 
+            // Create default address with static data
+            $this->createDefaultAddress($user);
+
             // Send account verification OTP to email
             $this->otpService->resendOtp(
                 $user->email,
@@ -97,6 +114,32 @@ class UserAuthService extends BaseService
                 'message' => 'Please verify your email with the OTP sent to your email address'
             ], 'User registered successfully. Verification OTP sent to email.', 201);
         });
+    }
+
+    /**
+     * Create default address for newly registered user
+     *
+     * @param mixed $user
+     * @return void
+     */
+    protected function createDefaultAddress($user): void
+    {
+        // Static default address data (will be replaced with form data later)
+        $addressData = [
+            'addressable_type' => get_class($user),
+            'addressable_id' => $user->id,
+            'label' => 'HOME',
+            'address_line' => '123 Default Street',
+            'city' => 'Default City',
+            'province' => 'Default Province',
+            'postal_code' => '00000',
+            'country_id' => 1, // Assuming country with ID 1 exists
+            'is_default' => true,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+
+        $this->addressRepository->create($addressData);
     }
 
     /**
