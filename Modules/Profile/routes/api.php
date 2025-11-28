@@ -14,6 +14,10 @@ Route::middleware(['auth:api'])->prefix('v1')->group(function () {
         Route::post('/verify-contact-change', [ProfileController::class, 'verifyContactChange']);
     });
     
+    // Language preference
+    Route::get('language', [ProfileController::class, 'getLanguage']);
+    Route::post('language', [ProfileController::class, 'setLanguage']);
+    
     // Notification settings for users
     Route::group(['prefix' => 'notification-config'], function() {
         Route::get('/', [NotificationController::class, 'index']);
@@ -32,6 +36,10 @@ Route::middleware(['auth:psw-api'])->prefix('v1/psw')->group(function () {
         Route::put('/', [ProfileController::class, 'updatePswProfile']); 
         Route::post('/verify-contact-change', [ProfileController::class, 'verifyPswContactChange']);
     });
+    
+    // Language preference
+    Route::get('language', [ProfileController::class, 'getLanguage']);
+    Route::post('language', [ProfileController::class, 'setLanguage']);
     
     // Notification settings for PSWs
     Route::group(['prefix' => 'notification-config'], function() {
