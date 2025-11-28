@@ -4,7 +4,7 @@ namespace Modules\Payment\Http\Controllers\Client;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Modules\Payment\Services\CashierCardService;
+use Modules\Payment\Services\Client\CashierCardService;
 
 class ClientCashierCardController extends Controller
 {
@@ -12,7 +12,7 @@ class ClientCashierCardController extends Controller
 
     public function index()
     {
-        return response()->json($this->service->listForClient());
+        return response()->json($this->service->getPaymentMethods());
     }
 
     public function store(Request $request)
@@ -20,12 +20,12 @@ class ClientCashierCardController extends Controller
         $data = $request->validate([
             'payment_method_id' => 'required|string',
         ]);
-        return response()->json($this->service->createForClient($data));
+        return response()->json($this->service->addPaymentMethod($data));
     }
 
     public function show(string $payment_method_id)
     {
-        return response()->json($this->service->showForClient($payment_method_id));
+        return response()->json($this->service->getPaymentMethod($payment_method_id));
     }
 
     public function update(Request $request, string $payment_method_id)
@@ -41,11 +41,11 @@ class ClientCashierCardController extends Controller
             'address_postal_code' => 'sometimes|string|max:20',
             'address_country' => 'sometimes|string|size:2',
         ]);
-        return response()->json($this->service->updateForClient($payment_method_id, $data));
+        return response()->json($this->service->updatePaymentMethod($payment_method_id, $data));
     }
 
     public function destroy(string $payment_method_id)
     {
-        return response()->json($this->service->deleteForClient($payment_method_id));
+        return response()->json($this->service->deletePaymentMethod($payment_method_id));
     }
 }

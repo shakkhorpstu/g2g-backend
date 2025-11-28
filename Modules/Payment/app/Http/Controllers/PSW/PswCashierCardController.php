@@ -4,7 +4,7 @@ namespace Modules\Payment\Http\Controllers\PSW;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Modules\Payment\Services\CashierCardService;
+use Modules\Payment\Services\PSW\CashierCardService;
 
 class PswCashierCardController extends Controller
 {
@@ -12,7 +12,7 @@ class PswCashierCardController extends Controller
 
     public function index()
     {
-        return response()->json($this->service->listForPsw());
+        return response()->json($this->service->getPaymentMethods());
     }
 
     public function store(Request $request)
@@ -20,12 +20,12 @@ class PswCashierCardController extends Controller
         $data = $request->validate([
             'payment_method_id' => 'required|string',
         ]);
-        return response()->json($this->service->createForPsw($data));
+        return response()->json($this->service->addPaymentMethod($data));
     }
 
     public function show(string $payment_method_id)
     {
-        return response()->json($this->service->showForPsw($payment_method_id));
+        return response()->json($this->service->getPaymentMethod($payment_method_id));
     }
 
     public function update(Request $request, string $payment_method_id)
@@ -41,11 +41,11 @@ class PswCashierCardController extends Controller
             'address_postal_code' => 'sometimes|string|max:20',
             'address_country' => 'sometimes|string|size:2',
         ]);
-        return response()->json($this->service->updateForPsw($payment_method_id, $data));
+        return response()->json($this->service->updatePaymentMethod($payment_method_id, $data));
     }
 
     public function destroy(string $payment_method_id)
     {
-        return response()->json($this->service->deleteForPsw($payment_method_id));
+        return response()->json($this->service->deletePaymentMethod($payment_method_id));
     }
 }

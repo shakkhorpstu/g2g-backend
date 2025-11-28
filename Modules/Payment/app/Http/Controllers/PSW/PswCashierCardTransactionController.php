@@ -4,22 +4,12 @@ namespace Modules\Payment\Http\Controllers\PSW;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Modules\Payment\Services\CashierCardTransactionService;
+use Modules\Payment\Services\PSW\CashierCardTransactionService;
 
 class PswCashierCardTransactionController extends Controller
 {
     public function __construct(private CashierCardTransactionService $service)
     {
-    }
-
-    public function index(string $payment_method_id)
-    {
-        return response()->json($this->service->listForPsw($payment_method_id));
-    }
-
-    public function show(string $payment_method_id, string $transaction_id)
-    {
-        return response()->json($this->service->showForPsw($payment_method_id, $transaction_id));
     }
 
     public function store(Request $request, string $payment_method_id)
@@ -30,6 +20,6 @@ class PswCashierCardTransactionController extends Controller
             'description' => 'sometimes|string|max:255',
         ]);
 
-        return response()->json($this->service->createForPsw($payment_method_id, $data));
+        return response()->json($this->service->makeTransaction($payment_method_id, $data));
     }
 }

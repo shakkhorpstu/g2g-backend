@@ -1,20 +1,14 @@
 <?php
 
-namespace Modules\Payment\Services;
+namespace Modules\Payment\Services\PSW;
 
 use App\Shared\Services\BaseService;
 use Illuminate\Support\Facades\Auth;
 use Stripe\StripeClient;
 
-/**
- * Cashier-based card (payment method) CRUD operations without touching existing Stripe direct controllers.
- * @method \Laravel\Cashier\Cashier createOrGetStripeCustomer()
- * @method \Stripe\Service\CustomerService stripe()
- * @method mixed findPaymentMethod(string $paymentMethodId)
- */
 class CashierCardService extends BaseService
 {
-    protected function user(string $guard)
+    protected function getStripeCustomer(string $guard)
     {
         $user = Auth::guard($guard)->user();
         if (!$user) {
@@ -27,41 +21,25 @@ class CashierCardService extends BaseService
         return $user;
     }
 
-    public function listForClient(): array
+    public function getPaymentMethods(): array
     {
-        $user = $this->user('api');
+        $user = $this->getStripeCustomer('psw-api');
         $methods = $user->paymentMethods();
         $items = collect($methods)->map(fn($pm) => $this->mapPaymentMethod($pm))->values();
         return $this->success(['items' => $items], 'Cashier cards retrieved');
     }
 
-    public function listForPsw(): array
+    public function getPaymentMethod(string $paymentMethodId): array
     {
-        $user = $this->user('psw-api');
-        $methods = $user->paymentMethods();
-        $items = collect($methods)->map(fn($pm) => $this->mapPaymentMethod($pm))->values();
-        return $this->success(['items' => $items], 'Cashier cards retrieved');
-    }
-
-    public function showForClient(string $paymentMethodId): array
-    {
-        $user = $this->user('api');
+        $user = $this->getStripeCustomer('psw-api');
         $pm = $user->findPaymentMethod($paymentMethodId);
         if (!$pm) { $this->fail('Payment method not found', 404); }
         return $this->success($this->mapPaymentMethod($pm), 'Cashier card details');
     }
 
-    public function showForPsw(string $paymentMethodId): array
+    public function addPaymentMethod(array $data): array
     {
-        $user = $this->user('psw-api');
-        $pm = $user->findPaymentMethod($paymentMethodId);
-        if (!$pm) { $this->fail('Payment method not found', 404); }
-        return $this->success($this->mapPaymentMethod($pm), 'Cashier card details');
-    }
-
-    public function createForClient(array $data): array
-    {
-        $user = $this->user('api');
+        $user = $this->getStripeCustomer('psw-api');
         $paymentMethodId = $data['payment_method_id'] ?? null;
         if (!$paymentMethodId) { $this->fail('payment_method_id required', 422); }
         $user->addPaymentMethod($paymentMethodId);
@@ -69,33 +47,9 @@ class CashierCardService extends BaseService
         return $this->success($this->mapPaymentMethod($pm), 'Cashier card added');
     }
 
-    public function createForPsw(array $data): array
+    public function updatePaymentMethod(string $paymentMethodId, array $data): array
     {
-        $user = $this->user('psw-api');
-        $paymentMethodId = $data['payment_method_id'] ?? null;
-        if (!$paymentMethodId) { $this->fail('payment_method_id required', 422); }
-        $user->addPaymentMethod($paymentMethodId);
-        $pm = $user->findPaymentMethod($paymentMethodId);
-        return $this->success($this->mapPaymentMethod($pm), 'Cashier card added');
-    }
-
-    public function updateForClient(string $paymentMethodId, array $data): array
-    {
-        $user = $this->user('api');
-        $pm = $user->findPaymentMethod($paymentMethodId);
-        if (!$pm) { $this->fail('Payment method not found', 404); }
-        $updateParams = $this->extractBillingUpdate($data);
-        if ($updateParams) {
-            $client = new StripeClient(config('cashier.secret'));
-            $client->paymentMethods->update($paymentMethodId, $updateParams);
-            $pm = $user->findPaymentMethod($paymentMethodId); // refresh
-        }
-        return $this->success($this->mapPaymentMethod($pm), 'Cashier card updated');
-    }
-
-    public function updateForPsw(string $paymentMethodId, array $data): array
-    {
-        $user = $this->user('psw-api');
+        $user = $this->getStripeCustomer('psw-api');
         $pm = $user->findPaymentMethod($paymentMethodId);
         if (!$pm) { $this->fail('Payment method not found', 404); }
         $updateParams = $this->extractBillingUpdate($data);
@@ -107,18 +61,9 @@ class CashierCardService extends BaseService
         return $this->success($this->mapPaymentMethod($pm), 'Cashier card updated');
     }
 
-    public function deleteForClient(string $paymentMethodId): array
+    public function deletePaymentMethod(string $paymentMethodId): array
     {
-        $user = $this->user('api');
-        $pm = $user->findPaymentMethod($paymentMethodId);
-        if (!$pm) { $this->fail('Payment method not found', 404); }
-        $pm->delete();
-        return $this->success(['payment_method_id' => $paymentMethodId], 'Cashier card deleted');
-    }
-
-    public function deleteForPsw(string $paymentMethodId): array
-    {
-        $user = $this->user('psw-api');
+        $user = $this->getStripeCustomer('psw-api');
         $pm = $user->findPaymentMethod($paymentMethodId);
         if (!$pm) { $this->fail('Payment method not found', 404); }
         $pm->delete();
@@ -141,7 +86,6 @@ class CashierCardService extends BaseService
             'billing_phone' => $pm->billing_details->phone ?? null,
         ];
     }
-
     protected function extractBillingUpdate(array $data): array
     {
         $billing = [];
