@@ -38,10 +38,7 @@ class UserProfileService extends BaseService
 
         $userWithProfile = $this->userProfileRepository->getUserWithProfile($user->id);
 
-        return $this->success([
-            'user' => $userWithProfile,
-            'profile' => $userWithProfile->profile
-        ], 'User profile retrieved successfully');
+        return $this->success($userWithProfile, 'User profile retrieved successfully');
     }
 
     /**
@@ -95,9 +92,7 @@ class UserProfileService extends BaseService
 
             $userWithProfile = $this->userProfileRepository->getUserWithProfile($user->id);
 
-            return $this->success([
-                'user' => $userWithProfile,
-            ], 'User profile updated successfully');
+            return $this->success($userWithProfile, 'User profile updated successfully');
         });
     }
 
@@ -144,9 +139,7 @@ class UserProfileService extends BaseService
 
             $userWithProfile = $this->userProfileRepository->getUserWithProfile($user->id);
 
-            return $this->success([
-                'user' => $userWithProfile,
-            ], ucfirst($type) . ' updated successfully');
+            return $this->success($userWithProfile, ucfirst($type) . ' updated successfully');
         });
     }
 

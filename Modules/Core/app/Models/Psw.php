@@ -78,7 +78,7 @@ class Psw extends Authenticatable
      */
     public function profile(): HasOne
     {
-        return $this->hasOne(PswProfile::class, 'psw_id');
+        return $this->hasOne(\Modules\Profile\Models\PswProfile::class, 'psw_id');
     }
 
     /**

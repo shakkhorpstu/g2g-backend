@@ -41,10 +41,7 @@ class PswProfileService extends BaseService
 
         $pswWithProfile = $this->pswProfileRepository->getPswWithProfile($psw->id);
 
-        return $this->success([
-            'psw' => $pswWithProfile,
-            'profile' => $pswWithProfile->profile
-        ], 'PSW profile retrieved successfully');
+        return $this->success($pswWithProfile, 'PSW profile retrieved successfully');
     }
 
     /**
@@ -99,10 +96,7 @@ class PswProfileService extends BaseService
             // Get updated PSW with profile
             $pswWithProfile = $this->pswProfileRepository->getPswWithProfile($psw->id);
 
-            return $this->success([
-                'psw' => $pswWithProfile,
-                'profile' => $pswWithProfile->profile
-            ], 'PSW profile updated successfully');
+            return $this->success($pswWithProfile, 'PSW profile updated successfully');
         });
     }
 
@@ -128,10 +122,7 @@ class PswProfileService extends BaseService
 
             $pswWithProfile = $this->pswProfileRepository->getPswWithProfile($psw->id);
 
-            return $this->success([
-                'psw' => $pswWithProfile,
-                'profile' => $pswWithProfile->profile
-            ], ucfirst($type) . ' updated successfully');
+            return $this->success($pswWithProfile, ucfirst($type) . ' updated successfully');
         });
     }
 
@@ -170,6 +161,70 @@ class PswProfileService extends BaseService
             }
 
             return $this->success(null, 'PSW profile deleted successfully');
+        });
+    }
+
+    /**
+     * Set availability status for authenticated PSW
+     *
+     * @param array $data
+     * @return array
+     */
+    public function setAvailability(array $data): array
+    {
+        return $this->executeWithTransaction(function () use ($data) {
+            $psw = $this->getAuthenticatedUserOrFail(['psw-api'], 'PSW not authenticated');
+
+            $profile = $this->pswProfileRepository->findByPswId($psw->id);
+            if (! $profile) {
+                $this->createInitialProfile($psw->id, []);
+            }
+
+            $this->pswProfileRepository->update($psw->id, [
+                'available_status' => (bool) ($data['available_status'] ?? false),
+            ]);
+
+            $pswWithProfile = $this->pswProfileRepository->getPswWithProfile($psw->id);
+
+            return $this->success($pswWithProfile, 'Availability updated successfully');
+        });
+    }
+
+    /**
+     * Set hourly rate and driving allowance settings for PSW
+     *
+     * @param array $data
+     * @return array
+     */
+    public function setRates(array $data): array
+    {
+        return $this->executeWithTransaction(function () use ($data) {
+            $psw = $this->getAuthenticatedUserOrFail(['psw-api'], 'PSW not authenticated');
+
+            $profile = $this->pswProfileRepository->findByPswId($psw->id);
+            if (! $profile) {
+                $this->createInitialProfile($psw->id, []);
+            }
+
+            $update = [];
+            if (array_key_exists('hourly_rate', $data)) {
+                $update['hourly_rate'] = $data['hourly_rate'] === null ? null : (float) $data['hourly_rate'];
+            }
+
+            $include = (bool) ($data['include_driving_allowance'] ?? false);
+            $update['include_driving_allowance'] = $include;
+
+            if ($include && array_key_exists('driving_allowance_per_km', $data)) {
+                $update['driving_allowance_per_km'] = $data['driving_allowance_per_km'] === null ? null : (float) $data['driving_allowance_per_km'];
+            } else {
+                $update['driving_allowance_per_km'] = null;
+            }
+
+            $this->pswProfileRepository->update($psw->id, $update);
+
+            $pswWithProfile = $this->pswProfileRepository->getPswWithProfile($psw->id);
+
+            return $this->success($pswWithProfile, 'Rates updated successfully');
         });
     }
 }
