@@ -3,9 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Payment\Http\Controllers\Client\CardController;
 use Modules\Payment\Http\Controllers\Client\CardTransactionController;
+use Modules\Payment\Http\Controllers\Client\ClientCashierWalletController;
 use Modules\Payment\Http\Controllers\Client\GooglePayController;
 use Modules\Payment\Http\Controllers\Client\TransactionController;
-use Modules\Payment\Http\Controllers\Client\ClientCashierWalletController;
 use Modules\Payment\Http\Controllers\Client\ClientCashierCardTransactionController;
 use Modules\Payment\Http\Controllers\Client\ClientCashierCardController;
 use Modules\Payment\Http\Controllers\PSW\CardController as PswCardController;
