@@ -26,6 +26,7 @@ class PswProfile extends Model
         'include_driving_allowance',
         'driving_allowance_per_km',
         'has_own_vehicle',
+        'has_wheelchair_accessible_vehicle',
     ];
 
     protected $casts = [
@@ -34,6 +35,7 @@ class PswProfile extends Model
         'include_driving_allowance' => 'boolean',
         'driving_allowance_per_km' => 'decimal:2',
         'has_own_vehicle' => 'boolean',
+        'has_wheelchair_accessible_vehicle' => 'boolean',
     ];
 
     /**
