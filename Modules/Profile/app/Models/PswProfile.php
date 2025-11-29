@@ -4,6 +4,7 @@ namespace Modules\Profile\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Profile\Models\ProfilePreference;
 
 class PswProfile extends Model
 {
@@ -44,5 +45,13 @@ class PswProfile extends Model
     public function psw(): BelongsTo
     {
         return $this->belongsTo(\Modules\Core\Models\Psw::class);
+    }
+
+    /**
+     * Preferences associated with this PSW profile.
+     */
+    public function preferences()
+    {
+        return $this->morphMany(ProfilePreference::class, 'owner');
     }
 }
