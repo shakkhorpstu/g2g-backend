@@ -31,8 +31,6 @@ Route::middleware(['auth:api'])->prefix('v1')->group(function () {
         Route::post('/{payment_method_id}/transactions', [CardTransactionController::class, 'store']);
 
         // Cashier Card Transactions (parallel, do not remove existing)
-        Route::get('/{payment_method_id}/cashier/transactions', [ClientCashierCardTransactionController::class, 'index']);
-        Route::get('/{payment_method_id}/cashier/transactions/{transaction_id}', [ClientCashierCardTransactionController::class, 'show']);
         Route::post('/{payment_method_id}/cashier/transactions', [ClientCashierCardTransactionController::class, 'store']);
     });
 
@@ -77,8 +75,6 @@ Route::middleware(['auth:psw-api'])->prefix('v1/psw')->group(function () {
         Route::post('/{payment_method_id}/transactions', [PswCardTransactionController::class, 'store']);
 
         // Cashier Card Transactions (parallel, do not remove existing)
-        Route::get('/{payment_method_id}/cashier/transactions', [PswCashierCardTransactionController::class, 'index']);
-        Route::get('/{payment_method_id}/cashier/transactions/{transaction_id}', [PswCashierCardTransactionController::class, 'show']);
         Route::post('/{payment_method_id}/cashier/transactions', [PswCashierCardTransactionController::class, 'store']);
     });
 
