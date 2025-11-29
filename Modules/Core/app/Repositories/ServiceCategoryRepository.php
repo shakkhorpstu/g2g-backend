@@ -10,7 +10,7 @@ class ServiceCategoryRepository implements ServiceCategoryRepositoryInterface
 
     public function all(): mixed
     {
-        return ServiceCategory::orderByDesc('id')->get();
+        return ServiceCategory::all();
     }
 
     public function find(int $id): ?ServiceCategory

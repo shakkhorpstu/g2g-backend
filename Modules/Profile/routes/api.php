@@ -7,6 +7,7 @@ use Modules\Profile\Http\Controllers\PswProfileController;
 use Modules\Profile\Http\Controllers\PreferenceController;
 use Modules\Profile\Http\Controllers\NotificationController;
 use Modules\Profile\Http\Controllers\PasswordController;
+use Modules\Profile\Http\Controllers\PswServiceCategoryController;
 
 // ============== USER/CLIENT ROUTES ==============
 Route::middleware(['auth:api'])->prefix('v1')->group(function () {
@@ -47,6 +48,8 @@ Route::middleware(['auth:psw-api'])->prefix('v1/psw')->group(function () {
         Route::put('/rates', [PswProfileController::class, 'setRates']);
         Route::get('/preferences', [PswProfileController::class, 'preferences']);
         Route::put('/preferences', [PswProfileController::class, 'syncPreferences']);
+        Route::get('/services', [PswServiceCategoryController::class, 'index']);
+        Route::put('/services', [PswServiceCategoryController::class, 'sync']);
     });
 
     // Language preference
