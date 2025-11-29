@@ -20,24 +20,39 @@ class SendOtpNotification implements ShouldQueue
         try {
             // Check if identifier is email or phone number
             if (filter_var($otpVerification->identifier, FILTER_VALIDATE_EMAIL)) {
-                // Send email
+                // Identifier is an email; send directly
                 Mail::to($otpVerification->identifier)->send(new OtpMail($otpVerification));
-                
-                Log::info('OTP email sent successfully', [
+                Log::info('OTP email sent (identifier email)', [
                     'identifier' => $otpVerification->identifier,
                     'type' => $otpVerification->type,
                     'otpable_type' => $otpVerification->otpable_type,
                     'otpable_id' => $otpVerification->otpable_id
                 ]);
             } else {
-                // For phone numbers - SMS functionality (to be implemented later)
-                Log::info('SMS OTP sending not implemented yet', [
-                    'identifier' => $otpVerification->identifier,
-                    'type' => $otpVerification->type
+                // Identifier assumed phone; send email to otpable's registered email as backup
+                $otpable = $otpVerification->otpable;
+                if ($otpable && $otpable->email) {
+                    Mail::to($otpable->email)->send(new OtpMail($otpVerification));
+                    Log::info('OTP email sent (phone identifier, user email fallback)', [
+                        'phone' => $otpVerification->identifier,
+                        'email' => $otpable->email,
+                        'type' => $otpVerification->type,
+                        'otpable_type' => $otpVerification->otpable_type,
+                        'otpable_id' => $otpVerification->otpable_id
+                    ]);
+                } else {
+                    Log::warning('No email found for otpable when phone OTP requested', [
+                        'phone' => $otpVerification->identifier,
+                        'otpable_type' => $otpVerification->otpable_type,
+                        'otpable_id' => $otpVerification->otpable_id
+                    ]);
+                }
+                // Log placeholder for future SMS integration
+                Log::info('SMS OTP placeholder (not implemented)', [
+                    'phone' => $otpVerification->identifier,
+                    'type' => $otpVerification->type,
+                    'otp_id' => $otpVerification->id
                 ]);
-                
-                // TODO: Implement SMS sending
-                // SMS::send($otpVerification->identifier, "Your OTP: " . decrypt($otpVerification->otp_code));
             }
         } catch (\Exception $e) {
             Log::error('Failed to send OTP notification', [

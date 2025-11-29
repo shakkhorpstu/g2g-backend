@@ -15,12 +15,14 @@ class OtpVerification extends Model
         'type',
         'status',
         'expires_at',
+        'verified_at',
         'attempts',
         'max_attempts'
     ];
 
     protected $casts = [
         'expires_at' => 'datetime',
+        'verified_at' => 'datetime',
         'attempts' => 'integer',
         'max_attempts' => 'integer'
     ];
@@ -72,6 +74,7 @@ class OtpVerification extends Model
     {
         $this->update([
             'status' => 'verified',
+            'verified_at' => now(),
             'updated_at' => now()
         ]);
     }

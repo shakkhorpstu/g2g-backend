@@ -47,4 +47,9 @@ interface PswRepositoryInterface
      * Get available PSWs
      */
     public function getAvailablePsws(int $limit = 10): array;
+
+    /**
+     * Mark PSW email as verified
+     */
+    public function markEmailAsVerified(Psw $psw): Psw;
 }
