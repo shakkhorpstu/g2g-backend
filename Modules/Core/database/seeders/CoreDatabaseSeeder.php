@@ -15,6 +15,7 @@ class CoreDatabaseSeeder extends Seeder
             UserSeeder::class,
             PswSeeder::class,
             AdminSeeder::class,
+            ServiceCategorySeeder::class,
         ]);
     }
 }
