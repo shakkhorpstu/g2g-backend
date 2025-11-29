@@ -11,78 +11,78 @@ use Stripe\StripeClient;
 class CashierWalletPaymentService extends BaseService
 {
     public function chargeViaWalletForClient(array $data): array
-{
-    $user = Auth::guard('api')->user();
-    if (!$user) { $this->fail('User not authenticated', 401); }
-    
-    // Drop unsafe fields
-    unset($data['type'], $data['payment_method_types']);
+    {
+        $user = Auth::guard('api')->user();
+        if (!$user) { $this->fail('User not authenticated', 401); }
 
-    $paymentMethodId = $data['payment_method_id'] ?? null;
-    $amount = $data['amount'] ?? null;
-    $currency = $data['currency'] ?? 'usd';
-    $description = $data['description'] ?? null;
+        // Drop unsafe fields
+        unset($data['type'], $data['payment_method_types']);
 
-    // Validation (already done in controller, but keep for safety)
-    if (!$paymentMethodId) { $this->fail('payment_method_id is required', 422); }
-    if (!$amount || !is_numeric($amount) || $amount <= 0) {
-        $this->fail('amount must be positive numeric', 422);
-    }
+        $paymentMethodId = $data['payment_method_id'] ?? null;
+        $amount = $data['amount'] ?? null;
+        $currency = $data['currency'] ?? 'usd';
+        $description = $data['description'] ?? null;
 
-    try {
-        if (!$user->hasPaymentMethod($paymentMethodId)) {
-            $user->addPaymentMethod($paymentMethodId);
-        }
-        if (!isset($user->stripe_id) || !$user->stripe_id) {
-            $user->createOrGetStripeCustomer();
+        // Validation (already done in controller, but keep for safety)
+        if (!$paymentMethodId) { $this->fail('payment_method_id is required', 422); }
+        if (!$amount || !is_numeric($amount) || $amount <= 0) {
+            $this->fail('amount must be positive numeric', 422);
         }
 
-        $stripe = new \Stripe\StripeClient(config('cashier.secret'));
-        $options = [
-            'amount' => (int)round($amount * 100),
-            'currency' => $currency,
-            'customer' => $user->stripe_id,
-            'payment_method' => $paymentMethodId,
-            'confirm' => true,
-            'return_url' => url('/payments/return'),
-        ];
-        if ($description) { $options['description'] = $description; }
-        // Optionally include shipping info
-        if (!empty($data['name']) || !empty($data['address'])) {
-            $options['shipping'] = [
-                'name' => $data['name'] ?? null,
-                'address' => [
-                    'line1' => $data['address']['line1'] ?? null,
-                    'city' => $data['address']['city'] ?? null,
-                    'state' => $data['address']['state'] ?? null,
-                    'postal_code' => $data['address']['postal_code'] ?? null,
-                    'country' => $data['address']['country'] ?? null,
-                ],
+        try {
+            if (!$user->hasPaymentMethod($paymentMethodId)) {
+                $user->addPaymentMethod($paymentMethodId);
+            }
+            if (!isset($user->stripe_id) || !$user->stripe_id) {
+                $user->createOrGetStripeCustomer();
+            }
+
+            $stripe = new \Stripe\StripeClient(config('cashier.secret'));
+            $options = [
+                'amount' => (int)round($amount * 100),
+                'currency' => $currency,
+                'customer' => $user->stripe_id,
+                'payment_method' => $paymentMethodId,
+                'confirm' => true,
+                'return_url' => url('/payments/return'),
             ];
+            if ($description) { $options['description'] = $description; }
+            // Optionally include shipping info
+            if (!empty($data['name']) || !empty($data['address'])) {
+                $options['shipping'] = [
+                    'name' => $data['name'] ?? null,
+                    'address' => [
+                        'line1' => $data['address']['line1'] ?? null,
+                        'city' => $data['address']['city'] ?? null,
+                        'state' => $data['address']['state'] ?? null,
+                        'postal_code' => $data['address']['postal_code'] ?? null,
+                        'country' => $data['address']['country'] ?? null,
+                    ],
+                ];
+            }
+
+            // --- DO NOT INCLUDE 'payment_method_types' or 'type' here! ---
+
+            \Log::debug('Wallet Charge Options', $options);
+
+            $payment = $stripe->paymentIntents->create($options);
+
+            // ... Save and respond as you do in your code ...
+            return $this->success(['stripe_payment_intent_id' => $payment->id], 'Wallet payment succeeded', 201);
+
+        } catch (\Stripe\Exception\ApiErrorException $e) {
+            $this->fail('Payment error: ' . $e->getMessage(), 502, [
+                'stripe_error' => [
+                    'type' => method_exists($e, 'getError') ? ($e->getError()['type'] ?? null) : null,
+                    'code' => method_exists($e, 'getError') ? ($e->getError()['code'] ?? null) : null,
+                    'param' => method_exists($e, 'getError') ? ($e->getError()['param'] ?? null) : null,
+                    'message' => $e->getMessage(),
+                ],
+            ]);
+        } catch (\Exception $e) {
+            $this->fail('Payment error: ' . $e->getMessage(), 502);
         }
-
-        // --- DO NOT INCLUDE 'payment_method_types' or 'type' here! ---
-
-        \Log::debug('Wallet Charge Options', $options);
-
-        $payment = $stripe->paymentIntents->create($options);
-
-        // ... Save and respond as you do in your code ...
-        return $this->success(['stripe_payment_intent_id' => $payment->id], 'Wallet payment succeeded', 201);
-
-    } catch (\Stripe\Exception\ApiErrorException $e) {
-        $this->fail('Payment error: ' . $e->getMessage(), 502, [
-            'stripe_error' => [
-                'type' => method_exists($e, 'getError') ? ($e->getError()['type'] ?? null) : null,
-                'code' => method_exists($e, 'getError') ? ($e->getError()['code'] ?? null) : null,
-                'param' => method_exists($e, 'getError') ? ($e->getError()['param'] ?? null) : null,
-                'message' => $e->getMessage(),
-            ],
-        ]);
-    } catch (\Exception $e) {
-        $this->fail('Payment error: ' . $e->getMessage(), 502);
     }
-}
 
     public function confirmPaymentForClient(string $paymentIntentId): array
     {
