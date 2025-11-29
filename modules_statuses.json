@@ -1,5 +1,5 @@
 {
     "Profile": true,
     "Core": true,
-    "Payment": false
+    "Payment": true
 }

@@ -4,7 +4,7 @@ namespace Modules\Payment\Http\Controllers\PSW;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Modules\Payment\Services\CashierWalletPaymentService;
+use Modules\Payment\Services\PSW\CashierWalletPaymentService;
 
 class PswCashierWalletController extends Controller
 {
@@ -17,6 +17,13 @@ class PswCashierWalletController extends Controller
             'amount' => 'required|numeric|min:0.5',
             'currency' => 'required|string|size:3',
             'description' => 'nullable|string',
+            'type' => 'prohibited',
+            'name' => 'nullable|string',
+            'address.line1' => 'nullable|string',
+            'address.city' => 'nullable|string',
+            'address.state' => 'nullable|string',
+            'address.postal_code' => 'nullable|string',
+            'address.country' => 'nullable|string|size:2',
         ]);
         return response()->json($this->service->chargeViaWalletForPsw($validated));
     }

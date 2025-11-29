@@ -2,41 +2,27 @@
 
 namespace Modules\Payment\Providers;
 
-use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\ServiceProvider;
 
 class RouteServiceProvider extends ServiceProvider
 {
-    protected string $name = 'Payment';
+    protected string $moduleName = 'Payment';
 
-    /**
-     * Called before routes are registered.
-     *
-     * Register any model bindings or pattern based filters.
-     */
     public function boot(): void
     {
-        parent::boot();
+        $this->registerApiRoutes();
     }
 
-    /**
-     * Define the routes for the application.
-     */
-    public function map(): void
+    protected function registerApiRoutes(): void
     {
-        $this->mapApiRoutes();
-    }
-
-    /**
-     * Define the "api" routes for the application.
-     *
-     * These routes are typically stateless.
-     */
-    protected function mapApiRoutes(): void
-    {
-        Route::middleware('api')
-            ->prefix('api')
-            ->name('api.')
-            ->group(module_path($this->name, '/routes/api.php'));
+        $routesFile = module_path($this->moduleName, 'routes/api.php');
+        if (file_exists($routesFile)) {
+            Route::middleware('api')
+                ->prefix('api')
+                ->group(function () use ($routesFile) {
+                    require $routesFile;
+                });
+        }
     }
 }
