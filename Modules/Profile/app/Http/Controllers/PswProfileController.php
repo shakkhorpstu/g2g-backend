@@ -8,6 +8,7 @@ use Modules\Profile\Http\Requests\UpdateProfileRequest;
 use Modules\Profile\Http\Requests\VerifyEmailChangeRequest;
 use Modules\Profile\Http\Requests\SetAvailabilityRequest;
 use Modules\Profile\Http\Requests\SetRatesRequest;
+use Modules\Profile\Http\Requests\SyncPreferencesRequest;
 use Modules\Profile\Services\PswProfileService;
 
 class PswProfileController extends ApiController
@@ -43,5 +44,25 @@ class PswProfileController extends ApiController
     public function setRates(SetRatesRequest $request): JsonResponse
     {
         return $this->executeService(fn() => $this->pswProfileService->setRates($request->validated()), 'Rates updated');
+    }
+
+    /**
+     * Get list of preferences attached to authenticated PSW profile
+     */
+    public function preferences(): JsonResponse
+    {
+        return $this->executeService(fn() => $this->pswProfileService->listPreferences(), 'Preferences retrieved');
+    }
+
+    /**
+     * Sync preferences for authenticated PSW profile (add/update/delete in one API)
+     *
+     * Request payload: { "preferences": [1,2,3] }
+     */
+    public function syncPreferences(SyncPreferencesRequest $request): JsonResponse
+    {
+        $data = $request->getSanitized();
+
+        return $this->executeService(fn() => $this->pswProfileService->syncPreferences($data['preferences'] ?? []), 'Preferences synced');
     }
 }

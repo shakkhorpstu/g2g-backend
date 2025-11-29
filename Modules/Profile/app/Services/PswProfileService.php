@@ -227,4 +227,148 @@ class PswProfileService extends BaseService
             return $this->success($pswWithProfile, 'Rates updated successfully');
         });
     }
+
+    /**
+     * List preferences attached to authenticated PSW profile
+     *
+     * @return array
+     */
+    public function listPreferences(): array
+    {
+        $psw = $this->getAuthenticatedUserOrFail(['psw-api'], 'PSW not authenticated');
+
+        $profile = $this->pswProfileRepository->findByPswId($psw->id);
+        if (! $profile) {
+            $this->createInitialProfile($psw->id, []);
+            $profile = $this->pswProfileRepository->findByPswId($psw->id);
+        }
+
+        $prefs = $profile->preferences()->with('preference')->get()->map(function ($pp) {
+            return [
+                'id' => $pp->preference->id ?? null,
+                'title' => $pp->preference->title ?? null,
+            ];
+        })->filter(fn($p) => $p['id'] !== null)->values()->toArray();
+
+        return $this->success($prefs, 'PSW preferences retrieved successfully');
+    }
+
+    /**
+     * Attach a preference to authenticated PSW profile
+     *
+     * @param int $preferenceId
+     * @return array
+     */
+    public function attachPreference(int $preferenceId): array
+    {
+        return $this->executeWithTransaction(function () use ($preferenceId) {
+            $psw = $this->getAuthenticatedUserOrFail(['psw-api'], 'PSW not authenticated');
+
+            $profile = $this->pswProfileRepository->findByPswId($psw->id);
+            if (! $profile) {
+                $this->createInitialProfile($psw->id, []);
+                $profile = $this->pswProfileRepository->findByPswId($psw->id);
+            }
+
+            // prevent duplicates
+            $existing = $profile->preferences()->where('preference_id', $preferenceId)->first();
+            if ($existing) {
+                return $this->success(null, 'Preference already attached');
+            }
+
+            $profile->preferences()->create(['preference_id' => $preferenceId]);
+
+            $prefs = $profile->preferences()->with('preference')->get()->map(function ($pp) {
+                return [
+                    'id' => $pp->preference->id ?? null,
+                    'title' => $pp->preference->title ?? null,
+                ];
+            })->filter(fn($p) => $p['id'] !== null)->values()->toArray();
+
+            return $this->success($prefs, 'Preference attached successfully');
+        });
+    }
+
+    /**
+     * Detach a preference from authenticated PSW profile
+     *
+     * @param int $preferenceId
+     * @return array
+     */
+    public function detachPreference(int $preferenceId): array
+    {
+        return $this->executeWithTransaction(function () use ($preferenceId) {
+            $psw = $this->getAuthenticatedUserOrFail(['psw-api'], 'PSW not authenticated');
+
+            $profile = $this->pswProfileRepository->findByPswId($psw->id);
+            if (! $profile) {
+                $this->fail('Profile not found', 404);
+            }
+
+            $deleted = $profile->preferences()->where('preference_id', $preferenceId)->delete();
+
+            if (! $deleted) {
+                $this->fail('Preference not attached', 404);
+            }
+
+            $prefs = $profile->preferences()->with('preference')->get()->map(function ($pp) {
+                return [
+                    'id' => $pp->preference->id ?? null,
+                    'title' => $pp->preference->title ?? null,
+                ];
+            })->filter(fn($p) => $p['id'] !== null)->values()->toArray();
+
+            return $this->success($prefs, 'Preference detached successfully');
+        });
+    }
+
+    /**
+     * Sync preferences for authenticated PSW profile.
+     * Accepts an array of preference IDs; will attach missing ones and detach removed ones.
+     *
+     * @param array $preferenceIds
+     * @return array
+     */
+    public function syncPreferences(array $preferenceIds): array
+    {
+        return $this->executeWithTransaction(function () use ($preferenceIds) {
+            $psw = $this->getAuthenticatedUserOrFail(['psw-api'], 'PSW not authenticated');
+
+            $profile = $this->pswProfileRepository->findByPswId($psw->id);
+            if (! $profile) {
+                $this->createInitialProfile($psw->id, []);
+                $profile = $this->pswProfileRepository->findByPswId($psw->id);
+            }
+
+            // Normalize incoming ids
+            $new = array_values(array_filter(array_map('intval', $preferenceIds)));
+
+            // Existing attached preference ids
+            $existing = $profile->preferences()->pluck('preference_id')->map(fn($v) => (int)$v)->toArray();
+
+            $toAttach = array_values(array_diff($new, $existing));
+            $toDetach = array_values(array_diff($existing, $new));
+
+            // Attach new preferences
+            foreach ($toAttach as $prefId) {
+                // avoid duplicate safety
+                $profile->preferences()->firstOrCreate(['preference_id' => $prefId]);
+            }
+
+            // Detach removed preferences
+            if (!empty($toDetach)) {
+                $profile->preferences()->whereIn('preference_id', $toDetach)->delete();
+            }
+
+            // Return updated list
+            $prefs = $profile->preferences()->with('preference')->get()->map(function ($pp) {
+                return [
+                    'id' => $pp->preference->id ?? null,
+                    'title' => $pp->preference->title ?? null,
+                ];
+            })->filter(fn($p) => $p['id'] !== null)->values()->toArray();
+
+            return $this->success($prefs, 'Preferences synced successfully');
+        });
+    }
 }

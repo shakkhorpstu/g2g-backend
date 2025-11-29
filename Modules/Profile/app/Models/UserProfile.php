@@ -4,6 +4,7 @@ namespace Modules\Profile\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Profile\Models\ProfilePreference;
 
 class UserProfile extends Model
 {
@@ -29,5 +30,13 @@ class UserProfile extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(\Modules\Core\Models\User::class);
+    }
+
+    /**
+     * Preferences associated with this profile.
+     */
+    public function preferences()
+    {
+        return $this->morphMany(ProfilePreference::class, 'owner');
     }
 }
