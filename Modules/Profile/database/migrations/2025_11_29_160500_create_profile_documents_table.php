@@ -18,6 +18,7 @@ class CreateProfileDocumentsTable extends Migration
 
                 // reference to document type
                 $table->unsignedBigInteger('document_type_id');
+                $table->enum('document_side_key', ['front', 'back'])->nullable(); // front or back side if applicable
 
                 // status (pending, uploaded, verified, rejected)
                 $table->string('status')->default('pending');
@@ -26,12 +27,10 @@ class CreateProfileDocumentsTable extends Migration
                 $table->string('uploaded_by_type')->nullable();
                 $table->unsignedBigInteger('uploaded_by_id')->nullable();
 
-                $table->string('verified_by_type')->nullable();
                 $table->unsignedBigInteger('verified_by_id')->nullable();
                 $table->timestamp('verified_at')->nullable();
 
                 // expiry and metadata
-                $table->timestamp('expires_at')->nullable();
                 $table->json('metadata')->nullable();
                 $table->text('admin_notes')->nullable();
 

@@ -15,13 +15,12 @@ class ProfileDocument extends Model
         'documentable_type',
         'documentable_id',
         'document_type_id',
+        'document_side_key',
         'status',
         'uploaded_by_type',
         'uploaded_by_id',
-        'verified_by_type',
         'verified_by_id',
         'verified_at',
-        'expires_at',
         'metadata',
         'admin_notes',
     ];
@@ -29,7 +28,6 @@ class ProfileDocument extends Model
     protected $casts = [
         'metadata' => 'array',
         'verified_at' => 'datetime',
-        'expires_at' => 'datetime',
     ];
 
     public function documentType(): BelongsTo

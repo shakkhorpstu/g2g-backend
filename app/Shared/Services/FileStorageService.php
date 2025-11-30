@@ -4,7 +4,6 @@ namespace App\Shared\Services;
 
 use App\Shared\Contracts\Repositories\FileStorageRepositoryInterface;
 use App\Shared\Models\FileStorage;
-// FileType and FileCategory enums removed — use simple string types and options instead
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -69,7 +68,7 @@ class FileStorageService extends BaseService
                 'original_name' => $file->getClientOriginalName(),
                 'stored_name' => $storedName,
                 'file_path' => $filePath,
-                    'file_url' => ($options['make_public'] ?? false) ? Storage::disk($this->disk)->url($filePath) : null,
+                'file_url' => ($options['make_public'] ?? false) ? Storage::disk($this->disk)->url($filePath) : null,
                 'mime_type' => $file->getMimeType(),
                 'file_size' => $file->getSize(),
                 'is_public' => $options['make_public'] ?? false,

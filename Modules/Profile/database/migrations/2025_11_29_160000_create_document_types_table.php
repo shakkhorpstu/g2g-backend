@@ -13,6 +13,7 @@ class CreateDocumentTypesTable extends Migration
                 $table->bigIncrements('id');
                 $table->string('key')->unique();
                 $table->string('title');
+                $table->string('icon')->nullable();
                 $table->text('description')->nullable();
                 $table->boolean('both_sided')->default(false);
                 $table->boolean('both_sided_required')->default(false);
@@ -20,9 +21,8 @@ class CreateDocumentTypesTable extends Migration
                 $table->string('back_side_title')->nullable();
                 $table->json('allowed_mime')->nullable();
                 $table->integer('max_size_kb')->nullable();
-                $table->boolean('required_for_psw')->default(false);
-                $table->boolean('required_for_user')->default(false);
                 $table->boolean('active')->default(true);
+                $table->boolean('is_required')->default(false);
                 $table->integer('sort_order')->default(0);
                 $table->timestamps();
             });

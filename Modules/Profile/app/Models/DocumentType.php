@@ -11,6 +11,7 @@ class DocumentType extends Model
     protected $fillable = [
         'key',
         'title',
+        'icon',
         'description',
         'both_sided',
         'both_sided_required',
@@ -18,9 +19,8 @@ class DocumentType extends Model
         'back_side_title',
         'allowed_mime',
         'max_size_kb',
-        'required_for_psw',
-        'required_for_user',
         'active',
+        'is_required',
         'sort_order',
     ];
 
