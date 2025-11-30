@@ -3,7 +3,7 @@
 namespace Modules\Profile\Repositories;
 
 use Modules\Profile\Contracts\Repositories\UserProfileRepositoryInterface;
-use Modules\Core\Models\UserProfile;
+use Modules\Profile\Models\UserProfile;
 use Modules\Core\Models\User;
 
 class UserProfileRepository implements UserProfileRepositoryInterface
@@ -58,10 +58,10 @@ class UserProfileRepository implements UserProfileRepositoryInterface
      * @param array $data
      * @return UserProfile
      */
-    public function updateOrCreate(int $userId, array $data): UserProfile
+     public function updateOrCreate(int $userId, array $data): User
     {
-        return UserProfile::updateOrCreate(
-            ['user_id' => $userId],
+        return User::updateOrCreate(
+            ['id' => $userId],
             $data
         );
     }

@@ -1,0 +1,8 @@
+{
+    "name": "Payment",
+    "alias": "payment",
+    "description": "Payment module for card management",
+    "keywords": [],
+    "priority": 0,
+    "providers": ["Modules\\Payment\\Providers\\PaymentServiceProvider"]
+}

@@ -17,4 +17,6 @@ interface OtpRepositoryInterface
     public function deleteExpiredOtps(): int;
     
     public function update(OtpVerification $otpVerification, array $data): bool;
+    
+    public function findByOtpableAndTypeVerified(string $otpableType, int $otpableId, string $type): ?OtpVerification;
 }

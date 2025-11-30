@@ -22,3 +22,7 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+/.cursor/mcp.json
+/rules/laravel-boost.mdc
+/.junie/guidelines.md
+/mcp/mcp.json

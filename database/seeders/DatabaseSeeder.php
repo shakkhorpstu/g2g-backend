@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
         // Run Core module seeders
         $this->call([
             CoreDatabaseSeeder::class,
+            PreferenceSeeder::class,
         ]);
 
         // Uncomment to create additional test users

@@ -9,7 +9,8 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^8.2",
+        "php": "^8.3",
+        "laravel/cashier": "^16.0",
         "laravel/framework": "^12.0",
         "laravel/passport": "*",
         "laravel/tinker": "^2.10.1",
@@ -32,7 +33,8 @@
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/",
             "Modules\\Core\\": "Modules/Core/app/",
-            "Modules\\Profile\\": "Modules/Profile/app/"
+            "Modules\\Profile\\": "Modules/Profile/app/",
+            "Modules\\Payment\\": "Modules/Payment/app/"
         }
     },
     "autoload-dev": {

@@ -2,7 +2,7 @@
 
 namespace Modules\Profile\Contracts\Repositories;
 
-use Modules\Core\Models\PswProfile;
+use Modules\Profile\Models\PswProfile;
 use Modules\Core\Models\Psw;
 
 interface PswProfileRepositoryInterface
@@ -40,7 +40,7 @@ interface PswProfileRepositoryInterface
      * @param array $data
      * @return PswProfile
      */
-    public function updateOrCreate(int $pswId, array $data): PswProfile;
+    public function updateOrCreate(int $pswId, array $data): Psw;
 
     /**
      * Delete PSW profile

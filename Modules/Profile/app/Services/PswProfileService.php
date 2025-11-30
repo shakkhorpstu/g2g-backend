@@ -4,6 +4,8 @@ namespace Modules\Profile\Services;
 
 use Modules\Profile\Contracts\Repositories\PswProfileRepositoryInterface;
 use App\Shared\Services\BaseService;
+use Modules\Core\Contracts\Repositories\PswRepositoryInterface;
+use Modules\Core\Services\OtpService;
 
 class PswProfileService extends BaseService
 {
@@ -13,15 +15,19 @@ class PswProfileService extends BaseService
      * @var PswProfileRepositoryInterface
      */
     protected PswProfileRepositoryInterface $pswProfileRepository;
+    protected PswRepositoryInterface $pswRepository;
+    protected OtpService $otpService;
 
     /**
      * PswProfileService constructor
      *
      * @param PswProfileRepositoryInterface $pswProfileRepository
      */
-    public function __construct(PswProfileRepositoryInterface $pswProfileRepository)
+    public function __construct(PswProfileRepositoryInterface $pswProfileRepository, PswRepositoryInterface $pswRepository, OtpService $otpService)
     {
         $this->pswProfileRepository = $pswProfileRepository;
+        $this->pswRepository = $pswRepository;
+        $this->otpService = $otpService;
     }
 
     /**
@@ -35,10 +41,7 @@ class PswProfileService extends BaseService
 
         $pswWithProfile = $this->pswProfileRepository->getPswWithProfile($psw->id);
 
-        return $this->success([
-            'psw' => $pswWithProfile,
-            'profile' => $pswWithProfile->profile
-        ], 'PSW profile retrieved successfully');
+        return $this->success($pswWithProfile, 'PSW profile retrieved successfully');
     }
 
     /**
@@ -52,20 +55,74 @@ class PswProfileService extends BaseService
         return $this->executeWithTransaction(function () use ($data) {
             $psw = $this->getAuthenticatedUserOrFail(['psw-api'], 'PSW not authenticated');
 
-            // Update profile data
-            $profileData = array_intersect_key($data, array_flip(['language_id']));
-            
-            if (!empty($profileData)) {
-                $this->pswProfileRepository->updateOrCreate($psw->id, $profileData);
+            $pendingChanges = [];
+
+            // Email change request
+            if (isset($data['email']) && $data['email'] !== $psw->email) {
+                $this->otpService->resendOtp(
+                    $data['email'],
+                    'email_update',
+                    get_class($psw),
+                    $psw->id
+                );
+                $pendingChanges[] = ['type' => 'email', 'value' => $data['email']];
+                unset($data['email']);
+            }
+
+            // Phone number change request
+            if (isset($data['phone_number']) && $data['phone_number'] !== $psw->phone_number) {
+                $this->otpService->resendOtp(
+                    $data['phone_number'],
+                    'phone_update',
+                    get_class($psw),
+                    $psw->id
+                );
+                $pendingChanges[] = ['type' => 'phone', 'value' => $data['phone_number']];
+                unset($data['phone_number']);
+            }
+
+            // If any pending changes require verification, return early
+            if (!empty($pendingChanges)) {
+                return $this->success([
+                    'pending_verifications' => $pendingChanges
+                ], 'Verification OTP sent for pending contact changes. Please verify to complete.');
+            }
+
+            // Update remaining profile data
+            if (!empty($data)) {
+                $this->pswProfileRepository->updateOrCreate($psw->id, $data);
             }
 
             // Get updated PSW with profile
             $pswWithProfile = $this->pswProfileRepository->getPswWithProfile($psw->id);
 
-            return $this->success([
-                'psw' => $pswWithProfile,
-                'profile' => $pswWithProfile->profile
-            ], 'PSW profile updated successfully');
+            return $this->success($pswWithProfile, 'PSW profile updated successfully');
+        });
+    }
+
+    public function verifyContactChange(array $data): array
+    {
+        return $this->executeWithTransaction(function () use ($data) {
+            $psw = $this->getAuthenticatedUserOrFail(['psw-api'], 'PSW not authenticated');
+
+            $type = $data['type']; // email or phone
+            $newValue = $data['new_value'];
+            $otpType = $type === 'email' ? 'email_update' : 'phone_update';
+
+            // Verify OTP for the given identifier and type
+            $this->otpService->verifyOtp(
+                $newValue,
+                $data['otp_code'],
+                $otpType
+            );
+
+            // Update PSW main record
+            $update = $type === 'email' ? ['email' => $newValue] : ['phone_number' => $newValue];
+            $psw = $this->pswRepository->update($psw, $update);
+
+            $pswWithProfile = $this->pswProfileRepository->getPswWithProfile($psw->id);
+
+            return $this->success($pswWithProfile, ucfirst($type) . ' updated successfully');
         });
     }
 
@@ -104,6 +161,214 @@ class PswProfileService extends BaseService
             }
 
             return $this->success(null, 'PSW profile deleted successfully');
+        });
+    }
+
+    /**
+     * Set availability status for authenticated PSW
+     *
+     * @param array $data
+     * @return array
+     */
+    public function setAvailability(array $data): array
+    {
+        return $this->executeWithTransaction(function () use ($data) {
+            $psw = $this->getAuthenticatedUserOrFail(['psw-api'], 'PSW not authenticated');
+
+            $profile = $this->pswProfileRepository->findByPswId($psw->id);
+            if (! $profile) {
+                $this->createInitialProfile($psw->id, []);
+            }
+
+            $this->pswProfileRepository->update($psw->id, [
+                'available_status' => (bool) ($data['available_status'] ?? false),
+            ]);
+
+            $pswWithProfile = $this->pswProfileRepository->getPswWithProfile($psw->id);
+
+            return $this->success($pswWithProfile, 'Availability updated successfully');
+        });
+    }
+
+    /**
+     * Set hourly rate and driving allowance settings for PSW
+     *
+     * @param array $data
+     * @return array
+     */
+    public function setRates(array $data): array
+    {
+        return $this->executeWithTransaction(function () use ($data) {
+            $psw = $this->getAuthenticatedUserOrFail(['psw-api'], 'PSW not authenticated');
+
+            $profile = $this->pswProfileRepository->findByPswId($psw->id);
+            if (! $profile) {
+                $this->createInitialProfile($psw->id, []);
+            }
+
+            $update = [];
+            if (array_key_exists('hourly_rate', $data)) {
+                $update['hourly_rate'] = $data['hourly_rate'] === null ? null : (float) $data['hourly_rate'];
+            }
+
+            $include = (bool) ($data['include_driving_allowance'] ?? false);
+            $update['include_driving_allowance'] = $include;
+
+            if ($include && array_key_exists('driving_allowance_per_km', $data)) {
+                $update['driving_allowance_per_km'] = $data['driving_allowance_per_km'] === null ? null : (float) $data['driving_allowance_per_km'];
+            } else {
+                $update['driving_allowance_per_km'] = null;
+            }
+
+            $this->pswProfileRepository->update($psw->id, $update);
+
+            $pswWithProfile = $this->pswProfileRepository->getPswWithProfile($psw->id);
+
+            return $this->success($pswWithProfile, 'Rates updated successfully');
+        });
+    }
+
+    /**
+     * List preferences attached to authenticated PSW profile
+     *
+     * @return array
+     */
+    public function listPreferences(): array
+    {
+        $psw = $this->getAuthenticatedUserOrFail(['psw-api'], 'PSW not authenticated');
+
+        $profile = $this->pswProfileRepository->findByPswId($psw->id);
+        if (! $profile) {
+            $this->createInitialProfile($psw->id, []);
+            $profile = $this->pswProfileRepository->findByPswId($psw->id);
+        }
+
+        $prefs = $profile->preferences()->with('preference')->get()->map(function ($pp) {
+            return [
+                'id' => $pp->preference->id ?? null,
+                'title' => $pp->preference->title ?? null,
+            ];
+        })->filter(fn($p) => $p['id'] !== null)->values()->toArray();
+
+        return $this->success($prefs, 'PSW preferences retrieved successfully');
+    }
+
+    /**
+     * Attach a preference to authenticated PSW profile
+     *
+     * @param int $preferenceId
+     * @return array
+     */
+    public function attachPreference(int $preferenceId): array
+    {
+        return $this->executeWithTransaction(function () use ($preferenceId) {
+            $psw = $this->getAuthenticatedUserOrFail(['psw-api'], 'PSW not authenticated');
+
+            $profile = $this->pswProfileRepository->findByPswId($psw->id);
+            if (! $profile) {
+                $this->createInitialProfile($psw->id, []);
+                $profile = $this->pswProfileRepository->findByPswId($psw->id);
+            }
+
+            // prevent duplicates
+            $existing = $profile->preferences()->where('preference_id', $preferenceId)->first();
+            if ($existing) {
+                return $this->success(null, 'Preference already attached');
+            }
+
+            $profile->preferences()->create(['preference_id' => $preferenceId]);
+
+            $prefs = $profile->preferences()->with('preference')->get()->map(function ($pp) {
+                return [
+                    'id' => $pp->preference->id ?? null,
+                    'title' => $pp->preference->title ?? null,
+                ];
+            })->filter(fn($p) => $p['id'] !== null)->values()->toArray();
+
+            return $this->success($prefs, 'Preference attached successfully');
+        });
+    }
+
+    /**
+     * Detach a preference from authenticated PSW profile
+     *
+     * @param int $preferenceId
+     * @return array
+     */
+    public function detachPreference(int $preferenceId): array
+    {
+        return $this->executeWithTransaction(function () use ($preferenceId) {
+            $psw = $this->getAuthenticatedUserOrFail(['psw-api'], 'PSW not authenticated');
+
+            $profile = $this->pswProfileRepository->findByPswId($psw->id);
+            if (! $profile) {
+                $this->fail('Profile not found', 404);
+            }
+
+            $deleted = $profile->preferences()->where('preference_id', $preferenceId)->delete();
+
+            if (! $deleted) {
+                $this->fail('Preference not attached', 404);
+            }
+
+            $prefs = $profile->preferences()->with('preference')->get()->map(function ($pp) {
+                return [
+                    'id' => $pp->preference->id ?? null,
+                    'title' => $pp->preference->title ?? null,
+                ];
+            })->filter(fn($p) => $p['id'] !== null)->values()->toArray();
+
+            return $this->success($prefs, 'Preference detached successfully');
+        });
+    }
+
+    /**
+     * Sync preferences for authenticated PSW profile.
+     * Accepts an array of preference IDs; will attach missing ones and detach removed ones.
+     *
+     * @param array $preferenceIds
+     * @return array
+     */
+    public function syncPreferences(array $preferenceIds): array
+    {
+        return $this->executeWithTransaction(function () use ($preferenceIds) {
+            $psw = $this->getAuthenticatedUserOrFail(['psw-api'], 'PSW not authenticated');
+
+            $profile = $this->pswProfileRepository->findByPswId($psw->id);
+            if (! $profile) {
+                $this->createInitialProfile($psw->id, []);
+                $profile = $this->pswProfileRepository->findByPswId($psw->id);
+            }
+
+            // Normalize incoming ids
+            $new = array_values(array_filter(array_map('intval', $preferenceIds)));
+
+            // Existing attached preference ids
+            $existing = $profile->preferences()->pluck('preference_id')->map(fn($v) => (int)$v)->toArray();
+
+            $toAttach = array_values(array_diff($new, $existing));
+            $toDetach = array_values(array_diff($existing, $new));
+
+            // Attach new preferences
+            foreach ($toAttach as $prefId) {
+                // avoid duplicate safety
+                $profile->preferences()->firstOrCreate(['preference_id' => $prefId]);
+            }
+
+            // Detach removed preferences
+            if (!empty($toDetach)) {
+                $profile->preferences()->whereIn('preference_id', $toDetach)->delete();
+            }
+
+            // Return updated list
+            $prefs = $profile->preferences()->with('preference')->get()->map(function ($pp) {
+                return [
+                    'id' => $pp->preference->id ?? null,
+                    'title' => $pp->preference->title ?? null,
+                ];
+            })->filter(fn($p) => $p['id'] !== null)->values()->toArray();
+
+            return $this->success($prefs, 'Preferences synced successfully');
         });
     }
 }

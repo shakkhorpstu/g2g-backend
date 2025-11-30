@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Models;
 
+use App\Shared\Traits\HasAddresses;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -9,11 +10,12 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
+use Laravel\Cashier\Billable;
 
 class Psw extends Authenticatable
 {
     /** @use HasFactory<\Modules\Core\Database\Factories\PswFactory> */
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, Billable, HasAddresses;
 
     /**
      * The table associated with the model.
@@ -76,7 +78,7 @@ class Psw extends Authenticatable
      */
     public function profile(): HasOne
     {
-        return $this->hasOne(PswProfile::class, 'psw_id');
+        return $this->hasOne(\Modules\Profile\Models\PswProfile::class, 'psw_id');
     }
 
     /**

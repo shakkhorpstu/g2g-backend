@@ -103,4 +103,17 @@ class PswRepository implements PswRepositoryInterface
             ->get()
             ->toArray();
     }
+
+    /**
+     * Mark PSW email as verified
+     */
+    public function markEmailAsVerified(Psw $psw): Psw
+    {
+        $psw->update([
+            'is_verified' => true,
+            'email_verified_at' => now()
+        ]);
+
+        return $psw->fresh();
+    }
 }

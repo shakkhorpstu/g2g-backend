@@ -2,34 +2,59 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Profile\Http\Controllers\ProfileController;
+use Modules\Profile\Http\Controllers\UserProfileController;
+use Modules\Profile\Http\Controllers\PswProfileController;
+use Modules\Profile\Http\Controllers\PreferenceController;
 use Modules\Profile\Http\Controllers\NotificationController;
 use Modules\Profile\Http\Controllers\PasswordController;
+use Modules\Profile\Http\Controllers\PswServiceCategoryController;
 
 // ============== USER/CLIENT ROUTES ==============
 Route::middleware(['auth:api'])->prefix('v1')->group(function () {
     // Profile
     Route::group(['prefix' => 'profile'], function() {
-        Route::get('/', [ProfileController::class, 'index']);
-        Route::put('/', [ProfileController::class, 'update']);
+        Route::get('/', [UserProfileController::class, 'index']);
+        Route::put('/', [UserProfileController::class, 'update']);
+        Route::post('/verify-contact-change', [UserProfileController::class, 'verifyContactChange']);
     });
     
+    // Language preference
+    Route::get('language', [ProfileController::class, 'getLanguage']);
+    Route::post('language', [ProfileController::class, 'setLanguage']);
+
     // Notification settings for users
     Route::group(['prefix' => 'notification-config'], function() {
         Route::get('/', [NotificationController::class, 'index']);
         Route::post('/', [NotificationController::class, 'update']);
     });
-    
+
     // Password change for users
     Route::put('change-password', [PasswordController::class, 'changeUserPassword']);
+});
+
+// Public endpoints (no auth)
+Route::prefix('v1')->group(function () {
+    Route::get('preferences', [PreferenceController::class, 'index']);
 });
 
 // ============== PSW ROUTES ==============
 Route::middleware(['auth:psw-api'])->prefix('v1/psw')->group(function () {
     // Profile
     Route::group(['prefix' => 'profile'], function() {
-        Route::get('/', [ProfileController::class, 'pswProfile']);
-        Route::put('/', [ProfileController::class, 'updatePswProfile']); 
+        Route::get('/', [PswProfileController::class, 'show']);
+        Route::put('/', [PswProfileController::class, 'update']); 
+        Route::post('/verify-contact-change', [PswProfileController::class, 'verifyContactChange']);
+        Route::put('/availability', [PswProfileController::class, 'setAvailability']);
+        Route::put('/rates', [PswProfileController::class, 'setRates']);
+        Route::get('/preferences', [PswProfileController::class, 'preferences']);
+        Route::put('/preferences', [PswProfileController::class, 'syncPreferences']);
+        Route::get('/services', [PswServiceCategoryController::class, 'index']);
+        Route::put('/services', [PswServiceCategoryController::class, 'sync']);
     });
+
+    // Language preference
+    Route::get('language', [ProfileController::class, 'getLanguage']);
+    Route::post('language', [ProfileController::class, 'setLanguage']);
     
     // Notification settings for PSWs
     Route::group(['prefix' => 'notification-config'], function() {
@@ -52,6 +77,13 @@ Route::middleware(['auth:admin-api'])->prefix('v1/admin')->group(function () {
         Route::get('/{userId}', [ProfileController::class, 'show']); 
         Route::put('/{userId}', [ProfileController::class, 'updateById']); 
         Route::delete('/{userId}', [ProfileController::class, 'destroyById']); 
+    });
+
+    // Admin preferences management
+    Route::group(['prefix' => 'preferences'], function() {
+        Route::post('/', [PreferenceController::class, 'store']);
+        Route::put('/{id}', [PreferenceController::class, 'update']);
+        Route::delete('/{id}', [PreferenceController::class, 'destroy']);
     });
 });
 

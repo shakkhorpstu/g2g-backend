@@ -4,8 +4,6 @@ namespace App\Shared\Services;
 
 use App\Shared\Contracts\Repositories\FileStorageRepositoryInterface;
 use App\Shared\Models\FileStorage;
-use App\Shared\Enums\FileType;
-use App\Shared\Enums\FileCategory;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -26,7 +24,7 @@ class FileStorageService extends BaseService
      *
      * @param UploadedFile $file
      * @param Model $owner
-     * @param string|FileType $fileType
+     * @param string $fileType
      * @param string|null $fileCategory
      * @param array $options
      * @return array
@@ -34,24 +32,15 @@ class FileStorageService extends BaseService
     public function storeFile(
         UploadedFile $file,
         Model $owner,
-        string|FileType $fileType,
+        string $fileType,
         ?string $fileCategory = null,
         array $options = []
     ): array {
         return $this->executeWithTransaction(function () use ($file, $owner, $fileType, $fileCategory, $options) {
-            // Convert enum to string if needed
-            $fileTypeString = $fileType instanceof FileType ? $fileType->value : $fileType;
+            $fileTypeString = (string) $fileType;
 
-            // Validate file type
-            $this->validateFileType($fileTypeString);
-
-            // Validate file category if provided
-            if ($fileCategory && !FileCategory::isValidCategory($fileTypeString, $fileCategory)) {
-                $this->fail('Invalid file category for the specified file type', 422);
-            }
-
-            // Validate file
-            $this->validateFile($file, $fileTypeString);
+            // Validate file using options if provided (allowed_mime, max_size)
+            $this->validateFile($file, $options);
 
             // Generate unique filename
             $extension = $file->getClientOriginalExtension();
@@ -93,10 +82,10 @@ class FileStorageService extends BaseService
             // Create file record
             $fileRecord = $this->fileStorageRepository->create($fileData);
 
-            return $this->successCreated([
+            return $this->success([
                 'file' => $fileRecord->toArray(),
                 'download_url' => $fileRecord->is_public ? $fileRecord->full_url : null,
-            ], 'File uploaded successfully');
+            ], 'File uploaded successfully', 201);
         });
     }
 
@@ -171,12 +160,7 @@ class FileStorageService extends BaseService
 
             $updateData = array_intersect_key($data, array_flip($allowedFields));
 
-            // Validate category if being updated
-            if (isset($updateData['file_category'])) {
-                if (!FileCategory::isValidCategory($file->file_type, $updateData['file_category'])) {
-                    $this->fail('Invalid file category for the specified file type', 422);
-                }
-            }
+            // Note: no enum-based category validation — caller should ensure valid category if needed
 
             $updatedFile = $this->fileStorageRepository->update($file, $updateData);
 
@@ -305,12 +289,8 @@ class FileStorageService extends BaseService
      *
      * @param string $fileType
      */
-    private function validateFileType(string $fileType): void
-    {
-        if (!in_array($fileType, FileType::values())) {
-            $this->fail('Invalid file type', 422);
-        }
-    }
+    // File type enum removed; validation should be provided via $options in storeFile
+
 
     /**
      * Validate uploaded file
@@ -318,21 +298,24 @@ class FileStorageService extends BaseService
      * @param UploadedFile $file
      * @param string $fileType
      */
-    private function validateFile(UploadedFile $file, string $fileType): void
+    private function validateFile(UploadedFile $file, array $options = []): void
     {
-        $fileTypeEnum = FileType::from($fileType);
-
-        // Check MIME type
-        $allowedMimeTypes = $fileTypeEnum->allowedMimeTypes();
-        if (!in_array($file->getMimeType(), $allowedMimeTypes)) {
-            $this->fail('Invalid file type. Allowed types: ' . implode(', ', $allowedMimeTypes), 422);
+        // Validate MIME types if provided in options (array of strings)
+        if (isset($options['allowed_mime']) && is_array($options['allowed_mime'])) {
+            $allowed = $options['allowed_mime'];
+            if (!in_array($file->getMimeType(), $allowed)) {
+                $this->fail('Invalid file type. Allowed types: ' . implode(', ', $allowed), 422);
+            }
         }
 
-        // Check file size
-        $maxSize = $fileTypeEnum->maxFileSize();
-        if ($file->getSize() > $maxSize) {
-            $maxSizeMB = round($maxSize / (1024 * 1024), 2);
-            $this->fail("File size exceeds maximum allowed size of {$maxSizeMB}MB", 422);
+        // Validate max size if provided (bytes or kilobytes)
+        if (isset($options['max_size_kb']) || isset($options['max_size'])) {
+            $maxKb = $options['max_size_kb'] ?? $options['max_size'];
+            $maxBytes = (int)$maxKb * 1024;
+            if ($file->getSize() > $maxBytes) {
+                $maxSizeMB = round($maxBytes / (1024 * 1024), 2);
+                $this->fail("File size exceeds maximum allowed size of {$maxSizeMB}MB", 422);
+            }
         }
     }
 

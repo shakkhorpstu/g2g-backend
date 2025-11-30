@@ -45,9 +45,7 @@ class CreatePswProfile
     {
         try {
             // Create initial profile for the registered PSW
-            $this->pswProfileService->createInitialProfile($event->psw->id, [
-                'language_id' => $event->registrationData['language_id'] ?? null
-            ]);
+            $this->pswProfileService->createInitialProfile($event->psw->id, []);
 
             // Create initial notification settings for the PSW
             NotificationSetting::createDefaults($event->psw);

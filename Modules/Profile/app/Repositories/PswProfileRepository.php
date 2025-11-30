@@ -3,7 +3,7 @@
 namespace Modules\Profile\Repositories;
 
 use Modules\Profile\Contracts\Repositories\PswProfileRepositoryInterface;
-use Modules\Core\Models\PswProfile;
+use Modules\Profile\Models\PswProfile;
 use Modules\Core\Models\Psw;
 
 class PswProfileRepository implements PswProfileRepositoryInterface
@@ -58,10 +58,10 @@ class PswProfileRepository implements PswProfileRepositoryInterface
      * @param array $data
      * @return PswProfile
      */
-    public function updateOrCreate(int $pswId, array $data): PswProfile
+    public function updateOrCreate(int $pswId, array $data): Psw
     {
-        return PswProfile::updateOrCreate(
-            ['psw_id' => $pswId],
+        return Psw::updateOrCreate(
+            ['id' => $pswId],
             $data
         );
     }

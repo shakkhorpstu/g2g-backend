@@ -14,7 +14,14 @@ class UpdateProfileRequest extends BaseProfileRequest
         $userId = Auth::id();
         
         return [
-            'name' => [
+            'first_name' => [
+                'sometimes',
+                'string',
+                'min:2',
+                'max:255',
+                'regex:/^[a-zA-Z\s]+$/' // Only letters and spaces
+            ],
+            'last_name' => [
                 'sometimes',
                 'string',
                 'min:2',
@@ -28,25 +35,13 @@ class UpdateProfileRequest extends BaseProfileRequest
                 'max:255',
                 "unique:users,email,{$userId}" // Exclude current user's email
             ],
-            'phone' => [
+            'phone_number' => [
                 'sometimes',
                 'nullable',
                 'string',
                 'max:20',
                 'regex:/^[\+]?[0-9\s\-\(\)]+$/' // Phone number format
-            ],
-            'address' => [
-                'sometimes',
-                'nullable',
-                'string',
-                'max:500'
-            ],
-            'bio' => [
-                'sometimes',
-                'nullable',
-                'string',
-                'max:1000'
-            ],
+            ]
         ];
     }
 
@@ -56,8 +51,9 @@ class UpdateProfileRequest extends BaseProfileRequest
     public function messages(): array
     {
         return array_merge(parent::messages(), [
-            'name.regex' => 'The name may only contain letters and spaces.',
-            'phone.regex' => 'The phone number format is invalid.',
+            'first_name.regex' => 'The first name may only contain letters and spaces.',
+            'last_name.regex' => 'The last name may only contain letters and spaces.',
+            'phone_number.regex' => 'The phone number format is invalid.',
         ]);
     }
 }

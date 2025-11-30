@@ -45,9 +45,7 @@ class CreateUserProfile
     {
         try {
             // Create initial profile for the registered user
-            $this->userProfileService->createInitialProfile($event->user->id, [
-                'language_id' => $event->registrationData['language_id'] ?? null
-            ]);
+            $this->userProfileService->createInitialProfile($event->user->id, []);
 
             // Create initial notification settings for the user
             NotificationSetting::createDefaults($event->user);

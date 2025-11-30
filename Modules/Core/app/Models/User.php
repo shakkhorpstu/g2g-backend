@@ -3,6 +3,7 @@
 namespace Modules\Core\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Shared\Traits\HasAddresses;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -10,11 +11,12 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
+use Laravel\Cashier\Billable;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Modules\Core\Database\Factories\UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, Billable, HasAddresses;
 
     /**
      * User status constants
@@ -39,6 +41,8 @@ class User extends Authenticatable
         'is_verified',
         'status',
         'last_login_at',
+        'email_verified_at',
+        'meta'
     ];
 
     /**
@@ -64,6 +68,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_verified' => 'boolean',
             'status' => 'integer',
+            'meta' => 'array'
         ];
     }
 
@@ -98,7 +103,7 @@ class User extends Authenticatable
      */
     public function profile(): HasOne
     {
-        return $this->hasOne(UserProfile::class);
+        return $this->hasOne(\Modules\Profile\Models\UserProfile::class);
     }
 
     /**

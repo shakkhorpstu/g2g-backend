@@ -72,6 +72,16 @@ class CoreServiceProvider extends ServiceProvider
             \Modules\Core\Contracts\Repositories\OtpRepositoryInterface::class,
             \Modules\Core\Repositories\OtpRepository::class
         );
+        
+        $this->app->bind(
+            \Modules\Core\Contracts\Repositories\ServiceCategoryRepositoryInterface::class,
+            \Modules\Core\Repositories\ServiceCategoryRepository::class
+        );
+        
+        $this->app->bind(
+            \Modules\Core\Contracts\Repositories\AddressRepositoryInterface::class,
+            \Modules\Core\Repositories\AddressRepository::class
+        );
     }
 
     /**

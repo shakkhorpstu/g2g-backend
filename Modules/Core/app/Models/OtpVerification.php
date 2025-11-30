@@ -74,7 +74,8 @@ class OtpVerification extends Model
     {
         $this->update([
             'status' => 'verified',
-            'verified_at' => now()
+            'verified_at' => now(),
+            'updated_at' => now()
         ]);
     }
 }
