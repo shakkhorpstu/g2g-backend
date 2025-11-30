@@ -40,8 +40,6 @@ return new class extends Migration
             
             // Indexes for performance
             $table->index(['fileable_type', 'fileable_id'], 'file_storages_fileable_index');
-            $table->index(['file_type', 'fileable_type'], 'file_storages_type_index');
-            $table->index(['is_verified', 'file_type'], 'file_storages_verified_index');
             $table->index(['uploaded_by_type', 'uploaded_by_id'], 'file_storages_uploader_index');
             $table->index('expires_at');
         });
