@@ -8,6 +8,7 @@ use Modules\Profile\Http\Controllers\PreferenceController;
 use Modules\Profile\Http\Controllers\NotificationController;
 use Modules\Profile\Http\Controllers\PasswordController;
 use Modules\Profile\Http\Controllers\PswServiceCategoryController;
+use Modules\Profile\Http\Controllers\PswAvailabilityController;
 
 // ============== USER/CLIENT ROUTES ==============
 Route::middleware(['auth:api'])->prefix('v1')->group(function () {
@@ -45,6 +46,9 @@ Route::middleware(['auth:psw-api'])->prefix('v1/psw')->group(function () {
         Route::put('/', [PswProfileController::class, 'update']); 
         Route::post('/verify-contact-change', [PswProfileController::class, 'verifyContactChange']);
         Route::put('/availability', [PswProfileController::class, 'setAvailability']);
+        // Full availability schedule (days + slots)
+        Route::get('/availability/schedule', [PswAvailabilityController::class, 'index']);
+        Route::put('/availability/schedule', [PswAvailabilityController::class, 'sync']);
         Route::put('/rates', [PswProfileController::class, 'setRates']);
         Route::get('/preferences', [PswProfileController::class, 'preferences']);
         Route::put('/preferences', [PswProfileController::class, 'syncPreferences']);

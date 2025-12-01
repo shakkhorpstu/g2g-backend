@@ -97,12 +97,12 @@ class UserAuthService extends BaseService
             $this->createDefaultAddress($user);
 
             // Send account verification OTP to email
-            $this->otpService->resendOtp(
-                $user->email,
-                'account_verification',
-                get_class($user),
-                $user->id
-            );
+            // $this->otpService->resendOtp(
+            //     $user->email,
+            //     'account_verification',
+            //     get_class($user),
+            //     $user->id
+            // );
 
             // Generate token using Passport
             $token = $user->createToken('auth_token')->accessToken;

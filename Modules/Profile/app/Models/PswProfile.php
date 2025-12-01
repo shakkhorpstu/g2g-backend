@@ -28,6 +28,7 @@ class PswProfile extends Model
         'driving_allowance_per_km',
         'has_own_vehicle',
         'has_wheelchair_accessible_vehicle',
+        'min_booking_slot',
     ];
 
     protected $casts = [
@@ -37,6 +38,7 @@ class PswProfile extends Model
         'driving_allowance_per_km' => 'decimal:2',
         'has_own_vehicle' => 'boolean',
         'has_wheelchair_accessible_vehicle' => 'boolean',
+        'min_booking_slot' => 'integer',
     ];
 
     /**
@@ -53,5 +55,15 @@ class PswProfile extends Model
     public function preferences()
     {
         return $this->morphMany(ProfilePreference::class, 'owner');
+    }
+
+    public function availabilityDays()
+    {
+        return $this->hasMany(PswAvailabilityDay::class, 'psw_profile_id');
+    }
+
+    public function availabilitySlots()
+    {
+        return $this->hasMany(PswAvailabilitySlot::class, 'psw_profile_id');
     }
 }
