@@ -49,12 +49,47 @@ class PswRegisterRequest extends BaseCoreRequest
                 'nullable',
                 'in:1,2,3'
             ],
-            // 'address' => [
-            //     'sometimes',
-            //     'nullable',
-            //     'string',
-            //     'max:1000'
-            // ],
+            'address' => [
+                'sometimes',
+                'nullable',
+                'array'
+            ],
+            'address.latitude' => [
+                'sometimes',
+                'required_with:address',
+                'string',
+                'max:32'
+            ],
+            'address.longitude' => [
+                'sometimes',
+                'required_with:address',
+                'string',
+                'max:32'
+            ],
+            'address.address_line' => [
+                'sometimes',
+                'required_with:address',
+                'string',
+                'max:500'
+            ],
+            'address.city' => [
+                'sometimes',
+                'required_with:address',
+                'string',
+                'max:255'
+            ],
+            'address.province' => [
+                'sometimes',
+                'required_with:address',
+                'string',
+                'max:255'
+            ],
+            'address.postal_code' => [
+                'sometimes',
+                'required_with:address',
+                'string',
+                'max:32'
+            ],
         ];
     }
 

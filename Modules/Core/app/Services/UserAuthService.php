@@ -94,7 +94,8 @@ class UserAuthService extends BaseService
             event(new UserRegistered($user, $data));
 
             // Create default address with static data
-            $this->createDefaultAddress($user);
+            $address = $data['address'] ?? [];
+            $this->createDefaultAddress($user, $address);
 
             // Send account verification OTP to email and include OTP context in response
             // $otp = $this->otpService->resendOtp(
@@ -114,20 +115,21 @@ class UserAuthService extends BaseService
      * Create default address for newly registered user
      *
      * @param mixed $user
+     * @param array $address
      * @return void
      */
-    protected function createDefaultAddress($user): void
+    protected function createDefaultAddress($user, $address = []): void
     {
         // Static default address data (will be replaced with form data later)
         $addressData = [
             'addressable_type' => get_class($user),
             'addressable_id' => $user->id,
-            'label' => 'HOME',
-            'address_line' => '123 Default Street',
-            'city' => 'Default City',
-            'province' => 'Default Province',
-            'postal_code' => '00000',
-            'country_id' => 1, // Assuming country with ID 1 exists
+            'label' => $address['label'] ?? 'HOME',
+            'address_line' => $address['address_line'] ?? '',
+            'city' => $address['city'] ?? '',
+            'province' => $address['province'] ?? '',
+            'postal_code' => $address['postal_code'] ?? '',
+            'country_id' => $address['country_id'] ?? env('DEFAULT_COUNTRTY_ID', 1), // Assuming country with ID 1 exists
             'is_default' => true,
             'created_at' => now(),
             'updated_at' => now(),
