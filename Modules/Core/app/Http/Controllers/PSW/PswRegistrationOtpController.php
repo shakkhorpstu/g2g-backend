@@ -3,8 +3,8 @@
 namespace Modules\Core\Http\Controllers\PSW;
 
 use Illuminate\Http\JsonResponse;
-use Modules\Core\App\Http\Requests\PSW\SendOtpRequest;
-use Modules\Core\App\Http\Requests\PSW\VerifyOtpRequest;
+use Modules\Core\Http\Requests\PSW\SendOtpRequest;
+use Modules\Core\Http\Requests\PSW\VerifyOtpRequest;
 use App\Http\Controllers\ApiController;
 use Modules\Core\Services\RegistrationOtpService;
 

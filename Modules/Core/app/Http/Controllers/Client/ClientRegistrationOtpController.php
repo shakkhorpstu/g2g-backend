@@ -3,8 +3,8 @@
 namespace Modules\Core\Http\Controllers\Client;
 
 use Illuminate\Http\JsonResponse;
-use Modules\Core\App\Http\Requests\Client\SendOtpRequest;
-use Modules\Core\App\Http\Requests\Client\VerifyOtpRequest;
+use Modules\Core\Http\Requests\Client\SendOtpRequest;
+use Modules\Core\Http\Requests\Client\VerifyOtpRequest;
 use App\Http\Controllers\ApiController;
 use Modules\Core\Services\RegistrationOtpService;
 

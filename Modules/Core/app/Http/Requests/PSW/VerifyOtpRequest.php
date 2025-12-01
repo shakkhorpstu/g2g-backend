@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Core\App\Http\Requests\PSW;
+namespace Modules\Core\Http\Requests\PSW;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -14,7 +14,7 @@ class VerifyOtpRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => 'required|integer',
+            'psw_id' => 'required|integer',
             'otp_code' => 'required|string|size:6',
         ];
     }

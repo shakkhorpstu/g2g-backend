@@ -57,8 +57,8 @@ Route::middleware(['auth:api'])->prefix('v1')->group(function () {
     Route::post('client-refresh', [UserAuthController::class, 'refresh']);
 
     // Registration OTP for client
-    Route::post('registration/send-otp', [ClientRegistrationOtpController::class, 'sendOtp']);
-    Route::post('registration/verify-otp', [ClientRegistrationOtpController::class, 'verifyOtp']);
+    Route::post('client-register/send-otp', [ClientRegistrationOtpController::class, 'sendOtp']);
+    Route::post('client-register/verify-otp', [ClientRegistrationOtpController::class, 'verifyOtp']);
 
     // User addresses
     Route::prefix('addresses')->group(function () {
@@ -78,8 +78,8 @@ Route::middleware(['auth:psw-api'])->prefix('v1')->group(function () {
     Route::post('psw-refresh', [PswAuthController::class, 'refresh']);
 
     // Registration OTP for PSW
-    Route::post('psw/registration/send-otp', [PswRegistrationOtpController::class, 'sendOtp']);
-    Route::post('psw/registration/verify-otp', [PswRegistrationOtpController::class, 'verifyOtp']);
+    Route::post('psw-register/send-otp', [PswRegistrationOtpController::class, 'sendOtp']);
+    Route::post('psw-register/verify-otp', [PswRegistrationOtpController::class, 'verifyOtp']);
 
     // PSW addresses
     Route::prefix('psw/addresses')->group(function () {
