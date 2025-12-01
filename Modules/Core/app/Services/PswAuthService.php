@@ -81,12 +81,12 @@ class PswAuthService extends BaseService
             $this->createDefaultAddress($psw);
 
             // Send account verification OTP to email
-            $this->otpService->resendOtp(
-                $psw->email,
-                'account_verification',
-                get_class($psw),
-                $psw->id
-            );
+            // $this->otpService->resendOtp(
+            //     $psw->email,
+            //     'account_verification',
+            //     get_class($psw),
+            //     $psw->id
+            // );
 
             // Generate token using Passport
             $token = $psw->createToken('psw_auth_token')->accessToken;
