@@ -80,23 +80,17 @@ class PswAuthService extends BaseService
             // Create default address with static data
             $this->createDefaultAddress($psw);
 
-            // Send account verification OTP to email
-            // $this->otpService->resendOtp(
+            // Send account verification OTP to email and include OTP context in response
+            // $otp = $this->otpService->resendOtp(
             //     $psw->email,
             //     'account_verification',
             //     get_class($psw),
             //     $psw->id
             // );
 
-            // Generate token using Passport
-            $token = $psw->createToken('psw_auth_token')->accessToken;
-
-            return $this->success([
-                'psw' => $psw,
-                'token' => $token,
-                'token_type' => 'Bearer',
-                'message' => 'Please verify your email with the OTP sent to your email address'
-            ], 'PSW registered successfully. Verification OTP sent to email.', 201);
+            $psw->setAttribute('otpable_type', get_class($psw));
+            $psw->setAttribute('otpable_id', $psw->id);
+            return $this->success($psw, 'PSW registered successfully', 201);
         });
     }
 
@@ -273,7 +267,7 @@ class PswAuthService extends BaseService
 
             // Verify OTP
             $this->otpService->verifyOtp(
-                $data['email'],
+                $data['identifier'],
                 $data['otp_code'],
                 'account_verification'
             );
@@ -284,9 +278,7 @@ class PswAuthService extends BaseService
                 'email_verified_at' => now(),
             ]);
 
-            return $this->success([
-                'psw' => $psw
-            ], 'PSW account verified successfully');
+            return $this->success($psw, 'Congratulations! Your account has been verified. You may now access all features');
         });
     }
 

@@ -20,6 +20,10 @@ class VerifyAccountRequest extends BaseCoreRequest
                 'required',
                 'string',
                 'size:6'
+            ],
+            'identifier' => [
+                'required',
+                'string'
             ]
         ];
     }

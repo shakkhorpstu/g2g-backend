@@ -49,11 +49,11 @@ class RegistrationOtpService extends BaseService
      */
     public function sendOtpForPsw(array $data): array
     {
-        $pswId = $data['user_id'] ?? null;
+        $pswId = $data['psw_id'] ?? null;
         $phone = $data['phone'] ?? null;
 
         if (!$pswId) {
-            $this->fail('user_id is required', 422);
+            $this->fail('psw_id is required', 422);
         }
 
         $psw = $this->pswRepository->findById((int) $pswId);

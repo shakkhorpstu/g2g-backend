@@ -21,7 +21,7 @@ class PswRegistrationOtpController extends Controller
     public function sendOtp(Request $request)
     {
         $validated = $request->validate([
-            'user_id' => 'required|integer',
+            'psw_id' => 'required|integer',
             'phone' => 'required|string|min:6|max:20',
         ]);
 
