@@ -113,6 +113,6 @@ class OtpService extends BaseService
      */
     private function generateOtpCode(): string
     {
-        return str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+        return str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
     }
 }
