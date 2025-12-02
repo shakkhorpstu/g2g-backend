@@ -11,6 +11,8 @@ use Modules\Profile\Http\Controllers\PasswordController;
 use Modules\Profile\Http\Controllers\PswServiceCategoryController;
 use Modules\Profile\Http\Controllers\PswAvailabilityController;
 use Modules\Profile\Http\Controllers\ProfilePictureController;
+use Modules\Profile\Http\Controllers\DocumentTypeController;
+use Modules\Profile\Http\Controllers\DocumentController;
 
 // ============== USER/CLIENT ROUTES ==============
 Route::middleware(['auth:api'])->prefix('v1')->group(function () {
@@ -33,6 +35,14 @@ Route::middleware(['auth:api'])->prefix('v1')->group(function () {
 
     // Password change for users
     Route::put('change-password', [PasswordController::class, 'changeUserPassword']);
+
+    // Documents
+    Route::group(['prefix' => 'documents'], function() {
+        Route::get('/types', [DocumentController::class, 'getTypes']);
+        Route::post('/', [DocumentController::class, 'storeOrUpdate']);
+        Route::get('/', [DocumentController::class, 'userDocument']);
+        Route::get('/{document_type_id}', [DocumentController::class, 'show']);
+    });
 });
 
 // Public endpoints (no auth)
@@ -70,6 +80,14 @@ Route::middleware(['auth:psw-api'])->prefix('v1/psw')->group(function () {
     
     // Password change for PSWs
     Route::put('change-password', [PasswordController::class, 'changePswPassword']);
+
+    // Documents
+    Route::group(['prefix' => 'documents'], function() {
+        Route::get('/types', [DocumentController::class, 'getTypes']);
+        Route::post('/', [DocumentController::class, 'storeOrUpdate']);
+        Route::get('/', [DocumentController::class, 'index']);
+        Route::get('/{document_type_id}', [DocumentController::class, 'show']);
+    });
 });
 
 // ============== ADMIN ROUTES ==============
@@ -87,6 +105,15 @@ Route::middleware(['auth:admin-api'])->prefix('v1/admin')->group(function () {
         Route::post('/', [PreferenceController::class, 'store']);
         Route::put('/{id}', [PreferenceController::class, 'update']);
         Route::delete('/{id}', [PreferenceController::class, 'destroy']);
+    });
+
+    // Document Types Management (Admin CRUD)
+    Route::group(['prefix' => 'document-types'], function() {
+        Route::get('/', [DocumentTypeController::class, 'index']);
+        Route::get('/{id}', [DocumentTypeController::class, 'show']);
+        Route::post('/', [DocumentTypeController::class, 'store']);
+        Route::put('/{id}', [DocumentTypeController::class, 'update']);
+        Route::delete('/{id}', [DocumentTypeController::class, 'destroy']);
     });
 });
 

@@ -60,6 +60,7 @@ class FileStorageService extends BaseService
             $fileData = [
                 'fileable_type' => get_class($owner),
                 'fileable_id' => $owner->id,
+                'file_type' => $options['file_type'] ?? null,
                 'original_name' => $file->getClientOriginalName(),
                 'stored_name' => $storedName,
                 'file_path' => $filePath,

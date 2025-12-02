@@ -12,6 +12,7 @@ class FileStorage extends Model
     protected $fillable = [
         'fileable_type',
         'fileable_id',
+        'file_type',
         'original_name',
         'stored_name',
         'file_path',

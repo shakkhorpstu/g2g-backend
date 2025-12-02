@@ -18,13 +18,13 @@
     "autoload": {
         "psr-4": {
             "Modules\\Profile\\": "app/",
-            "Modules\\Auth\\Database\\Factories\\": "database/factories/",
-            "Modules\\Auth\\Database\\Seeders\\": "database/seeders/"
+            "Modules\\Profile\\Database\\Factories\\": "database/factories/",
+            "Modules\\Profile\\Database\\Seeders\\": "database/seeders/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Modules\\Auth\\Tests\\": "tests/"
+            "Modules\\Profile\\Tests\\": "tests/"
         }
     }
 }

@@ -49,6 +49,18 @@ class RepositoryServiceProvider extends ServiceProvider
             \Modules\Profile\Contracts\Repositories\PswAvailabilityRepositoryInterface::class,
             \Modules\Profile\Repositories\PswAvailabilityRepository::class
         );
+
+        // Bind Document Type Repository
+        $this->app->bind(
+            \Modules\Profile\Contracts\Repositories\DocumentTypeRepositoryInterface::class,
+            \Modules\Profile\Repositories\DocumentTypeRepository::class
+        );
+
+        // Bind Profile Document Repository
+        $this->app->bind(
+            \Modules\Profile\Contracts\Repositories\ProfileDocumentRepositoryInterface::class,
+            \Modules\Profile\Repositories\ProfileDocumentRepository::class
+        );
     }
 
     /**
