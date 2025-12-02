@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 class FileStorageService extends BaseService
 {
     protected FileStorageRepositoryInterface $fileStorageRepository;
+    protected array $allowedGuards = ['api', 'psw-api', 'admin-api'];
     protected string $disk = 'do_spaces';
 
     public function __construct(FileStorageRepositoryInterface $fileStorageRepository)
@@ -32,13 +33,9 @@ class FileStorageService extends BaseService
     public function storeFile(
         UploadedFile $file,
         Model $owner,
-        string $fileType,
-        ?string $fileCategory = null,
         array $options = []
     ): array {
-        return $this->executeWithTransaction(function () use ($file, $owner, $fileType, $fileCategory, $options) {
-            $fileTypeString = (string) $fileType;
-
+        return $this->executeWithTransaction(function () use ($file, $owner, $options) {
             // Validate file using options if provided (allowed_mime, max_size)
             $this->validateFile($file, $options);
 
@@ -47,7 +44,7 @@ class FileStorageService extends BaseService
             $storedName = $this->generateUniqueFileName($extension);
 
             // Build organized file path
-            $filePath = $this->buildFilePath($fileTypeString, $owner, $storedName);
+            $filePath = $this->buildFilePath($owner, $storedName);
 
             // Store file in Digital Ocean Spaces
             $uploaded = Storage::disk($this->disk)->put($filePath, file_get_contents($file));
@@ -57,22 +54,18 @@ class FileStorageService extends BaseService
             }
 
             // Get authenticated user as uploader
-            $uploader = $this->getAuthenticatedUser();
+            $uploader = $this->getAuthenticatedUser($this->allowedGuards);
 
             // Prepare file record data
             $fileData = [
                 'fileable_type' => get_class($owner),
                 'fileable_id' => $owner->id,
-                'file_type' => $fileTypeString,
-                'file_category' => $fileCategory,
                 'original_name' => $file->getClientOriginalName(),
                 'stored_name' => $storedName,
                 'file_path' => $filePath,
-                'file_url' => ($options['make_public'] ?? false) ? Storage::disk($this->disk)->url($filePath) : null,
+                'file_url' => $this->getUrl($filePath),
                 'mime_type' => $file->getMimeType(),
                 'file_size' => $file->getSize(),
-                'is_public' => $options['make_public'] ?? false,
-                'is_verified' => $options['auto_verify'] ?? false,
                 'uploaded_by_type' => $uploader ? get_class($uploader) : null,
                 'uploaded_by_id' => $uploader ? $uploader->id : null,
                 'metadata' => $this->extractMetadata($file),
@@ -82,11 +75,13 @@ class FileStorageService extends BaseService
             // Create file record
             $fileRecord = $this->fileStorageRepository->create($fileData);
 
-            return $this->success([
-                'file' => $fileRecord->toArray(),
-                'download_url' => $fileRecord->is_public ? $fileRecord->full_url : null,
-            ], 'File uploaded successfully', 201);
+            return $fileRecord->toArray();
         });
+    }
+
+    public function getUrl(string $filePath): string
+    {
+        return rtrim(env('DO_SPACES_URL'), '/') . '/' . trim($filePath, '/');
     }
 
     /**
@@ -342,13 +337,13 @@ class FileStorageService extends BaseService
      * @param string $filename
      * @return string
      */
-    private function buildFilePath(string $fileType, Model $owner, string $filename): string
+    private function buildFilePath(Model $owner, string $filename): string
     {
-        $ownerType = class_basename($owner);
+        $ownerType = strtolower(class_basename($owner));
         $ownerId = $owner->id;
         $yearMonth = now()->format('Y/m');
 
-        return "{$fileType}/{$ownerType}/{$ownerId}/{$yearMonth}/{$filename}";
+        return "{$ownerType}/{$ownerId}/{$yearMonth}/{$filename}";
     }
 
     /**

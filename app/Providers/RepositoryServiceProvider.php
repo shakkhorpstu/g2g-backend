@@ -25,6 +25,12 @@ class RepositoryServiceProvider extends ServiceProvider
         // Register global/shared repository bindings here
         // Module-specific repositories are handled in their respective modules
         
+        // File Storage Repository (used across modules)
+        $this->app->bind(
+            \App\Shared\Contracts\Repositories\FileStorageRepositoryInterface::class,
+            \App\Shared\Repositories\FileStorageRepository::class
+        );
+        
         // Note: Authentication repositories are now handled in Core module
         // See: Modules/Core/app/Providers/CoreServiceProvider.php
         

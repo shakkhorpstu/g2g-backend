@@ -9,6 +9,7 @@ use Modules\Profile\Http\Controllers\NotificationController;
 use Modules\Profile\Http\Controllers\PasswordController;
 use Modules\Profile\Http\Controllers\PswServiceCategoryController;
 use Modules\Profile\Http\Controllers\PswAvailabilityController;
+use Modules\Profile\Http\Controllers\ProfilePictureController;
 
 // ============== USER/CLIENT ROUTES ==============
 Route::middleware(['auth:api'])->prefix('v1')->group(function () {
@@ -94,4 +95,11 @@ Route::middleware(['auth:admin-api'])->prefix('v1/admin')->group(function () {
 // ============== UNIVERSAL PASSWORD CHANGE ROUTE ==============
 Route::middleware(['auth:api,psw-api,admin-api'])->prefix('v1')->group(function () {
     Route::put('password/change', [PasswordController::class, 'changePassword']);
+});
+
+// ============== PROFILE PICTURE UPLOAD (DYNAMIC ROUTE) ==============
+Route::prefix('v1/{user_type}/profile-picture')->group(function () {
+    Route::put('/', [ProfilePictureController::class, 'upload'])
+        ->middleware('auth:api,psw-api,admin-api')
+        ->where('user_type', 'user|psw|admin');
 });
