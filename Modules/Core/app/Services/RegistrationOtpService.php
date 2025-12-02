@@ -151,6 +151,7 @@ class RegistrationOtpService extends BaseService
             'otp_id' => $otp->id,
             'identifier' => $identifier,
             'user_id' => $user->id,
+            'code' => $otpCode,
             'type' => 'account_verification'
         ]);
 
