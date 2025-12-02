@@ -18,8 +18,6 @@ class FileStorage extends Model
         'file_url',
         'mime_type',
         'file_size',
-        'is_verified',
-        'is_public',
         'uploaded_by_type',
         'uploaded_by_id',
         'metadata',
