@@ -4,6 +4,7 @@ namespace Modules\Core\Http\Controllers;
 
 use Modules\Core\Services\AuthService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Modules\Core\Http\Requests\RegisterRequest;
 use Modules\Core\Http\Requests\LoginRequest;
 use Modules\Core\Http\Requests\AdminLoginRequest;
@@ -144,6 +145,22 @@ class AuthController extends ApiController
         return $this->executeService(
             fn() => $this->authService->pswLogin($request->getSanitizedData()),
             'PSW login successful'
+        );
+    }
+
+    /**
+     * Verify two-factor login OTP and create token
+     */
+    public function verifyTwoFactor(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'identifier' => 'required|string',
+            'otp_code' => 'required|string|size:6',
+        ]);
+
+        return $this->executeService(
+            fn() => $this->authService->verifyTwoFactor($data),
+            'Login successful'
         );
     }
 

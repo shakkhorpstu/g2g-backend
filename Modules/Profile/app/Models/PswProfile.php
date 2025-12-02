@@ -29,6 +29,8 @@ class PswProfile extends Model
         'has_own_vehicle',
         'has_wheelchair_accessible_vehicle',
         'min_booking_slot',
+        '2fa_enabled',
+        '2fa_identifier_key',
     ];
 
     protected $casts = [
@@ -39,6 +41,8 @@ class PswProfile extends Model
         'has_own_vehicle' => 'boolean',
         'has_wheelchair_accessible_vehicle' => 'boolean',
         'min_booking_slot' => 'integer',
+        '2fa_enabled' => 'boolean',
+        '2fa_identifier_key' => 'string',
     ];
 
     /**

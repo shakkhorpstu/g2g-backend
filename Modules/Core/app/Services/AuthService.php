@@ -5,6 +5,9 @@ namespace Modules\Core\Services;
 use Modules\Core\Contracts\Repositories\AuthRepositoryInterface;
 use Modules\Core\Contracts\Repositories\PswRepositoryInterface;
 use Modules\Core\Contracts\Repositories\AdminRepositoryInterface;
+use Modules\Profile\Contracts\Repositories\UserProfileRepositoryInterface;
+use Modules\Profile\Contracts\Repositories\PswProfileRepositoryInterface;
+use Modules\Core\Services\OtpService;
 use App\Shared\Exceptions\ServiceException;
 use App\Shared\Services\BaseService;
 use Illuminate\Support\Facades\Auth;
@@ -42,6 +45,10 @@ class AuthService extends BaseService
      */
     protected AdminRepositoryInterface $adminRepository;
 
+    protected UserProfileRepositoryInterface $userProfileRepository;
+    protected PswProfileRepositoryInterface $pswProfileRepository;
+    protected OtpService $otpService;
+
     /**
      * AuthService constructor
      *
@@ -49,11 +56,20 @@ class AuthService extends BaseService
      * @param PswRepositoryInterface $pswRepository
      * @param AdminRepositoryInterface $adminRepository
      */
-    public function __construct(AuthRepositoryInterface $authRepository, PswRepositoryInterface $pswRepository, AdminRepositoryInterface $adminRepository)
-    {
+    public function __construct(
+        AuthRepositoryInterface $authRepository,
+        PswRepositoryInterface $pswRepository,
+        AdminRepositoryInterface $adminRepository,
+        UserProfileRepositoryInterface $userProfileRepository,
+        PswProfileRepositoryInterface $pswProfileRepository,
+        OtpService $otpService
+    ) {
         $this->authRepository = $authRepository;
         $this->pswRepository = $pswRepository;
         $this->adminRepository = $adminRepository;
+        $this->userProfileRepository = $userProfileRepository;
+        $this->pswProfileRepository = $pswProfileRepository;
+        $this->otpService = $otpService;
     }
 
     /**
@@ -109,6 +125,23 @@ class AuthService extends BaseService
 
             // Update last login
             $this->authRepository->updateLastLogin($user);
+
+            // Check 2FA status on user profile
+            $profile = $this->userProfileRepository->findByUserId($user->id);
+            if ($profile && !empty($profile->{'2fa_enabled'})) {
+                // Send OTP for two-factor login
+                $identifier = ($profile->{'2fa_identifier_key'} ?? '') === 'phone' ? $user->phone_number : $user->email;
+                if (!$identifier) {
+                    $this->fail('Two-factor is enabled but identifier not configured', 422);
+                }
+
+                $this->otpService->resendOtp($identifier, 'two_factor', get_class($user), $user->id);
+
+                return $this->success([
+                    'requires_2fa' => true,
+                    'identifier' => $profile->{'2fa_identifier_key'} ?? null,
+                ], 'Two-factor authentication required');
+            }
 
             // Generate token
             $token = $user->createToken('auth_token')->accessToken;
@@ -301,6 +334,22 @@ class AuthService extends BaseService
             // Update last login
             $this->pswRepository->updateLastLogin($psw);
 
+            // Check 2FA on PSW profile
+            $profile = $this->pswProfileRepository->findByPswId($psw->id);
+            if ($profile && !empty($profile->{'2fa_enabled'})) {
+                $identifier = ($profile->{'2fa_identifier_key'} ?? '') === 'phone' ? $psw->phone_number : $psw->email;
+                if (!$identifier) {
+                    $this->fail('Two-factor is enabled but identifier not configured', 422);
+                }
+
+                $this->otpService->resendOtp($identifier, 'two_factor', get_class($psw), $psw->id);
+
+                return $this->success([
+                    'requires_2fa' => true,
+                    'identifier' => $profile->{'2fa_identifier_key'} ?? null,
+                ], 'Two-factor authentication required');
+            }
+
             // Generate token
             $token = $psw->createToken('psw_auth_token')->accessToken;
 
@@ -309,6 +358,62 @@ class AuthService extends BaseService
                 'token' => $token,
                 'token_type' => 'Bearer'
             ], 'PSW login successful');
+        });
+    }
+
+    /**
+     * Verify two-factor OTP (login-time) and create token
+     *
+     * @param array $data ['identifier' => '...', 'otp_code' => '123456']
+     * @return array
+     */
+    public function verifyTwoFactor(array $data): array
+    {
+        return $this->executeWithTransaction(function () use ($data) {
+            $identifier = $data['identifier'] ?? null;
+            $otpCode = $data['otp_code'] ?? null;
+
+            if (!$identifier || !$otpCode) {
+                $this->fail('identifier and otp_code are required', 422);
+            }
+
+            // Verify OTP and get otpable info
+            $result = $this->otpService->verifyOtp($identifier, $otpCode, 'two_factor');
+            $otpData = $result['data'] ?? [];
+            $otpableType = $otpData['otpable_type'] ?? null;
+            $otpableId = $otpData['otpable_id'] ?? null;
+
+            if (!$otpableType || !$otpableId) {
+                $this->fail('Invalid OTP verification result', 400);
+            }
+
+            // Instantiate model and find record
+            if (!class_exists($otpableType)) {
+                $this->fail('Unknown account type', 400);
+            }
+
+            $model = $otpableType::find($otpableId);
+            if (!$model) {
+                $this->fail('Account not found', 404);
+            }
+
+            // Create token depending on type
+            if (stripos($otpableType, 'Psw') !== false) {
+                $token = $model->createToken('psw_auth_token')->accessToken;
+                return $this->success([
+                    'psw' => $model,
+                    'token' => $token,
+                    'token_type' => 'Bearer'
+                ], 'Login successful');
+            }
+
+            // Default to user
+            $token = $model->createToken('auth_token')->accessToken;
+            return $this->success([
+                'user' => $model,
+                'token' => $token,
+                'token_type' => 'Bearer'
+            ], 'Login successful');
         });
     }
 

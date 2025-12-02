@@ -11,6 +11,7 @@ use Modules\Core\Events\UserRegistered;
 use Modules\Core\Services\OtpService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Modules\Profile\Models\UserProfile;
 
 /**
  * User Authentication Service
@@ -177,6 +178,23 @@ class UserAuthService extends BaseService
 
             // Update last login
             $this->userRepository->updateLastLogin($user);
+
+            // Check 2FA on user's profile
+            $profile = UserProfile::where('user_id', $user->id)->first();
+            if ($profile && !empty($profile->{'2fa_enabled'})) {
+                $identifier = ($profile->{'2fa_identifier_key'} ?? '') === 'phone' ? $user->phone_number : $user->email;
+                if (!$identifier) {
+                    $this->fail('Two-factor is enabled but identifier not configured', 422);
+                }
+
+                // Send two-factor OTP
+                $this->otpService->resendOtp($identifier, 'two_factor', get_class($user), $user->id);
+
+                return $this->success([
+                    'requires_2fa' => true,
+                    'identifier' => $profile->{'2fa_identifier_key'} ?? null,
+                ], 'Two-factor authentication required');
+            }
 
             // Generate token
             $token = $user->createToken('auth_token')->accessToken;

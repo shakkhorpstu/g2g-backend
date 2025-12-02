@@ -22,6 +22,13 @@ class UserProfile extends Model
      */
     protected $fillable = [
         'user_id',
+        '2fa_enabled',
+        '2fa_identifier_key',
+    ];
+
+    protected $casts = [
+        '2fa_enabled' => 'boolean',
+        '2fa_identifier_key' => 'string',
     ];
 
     /**

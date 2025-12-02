@@ -6,6 +6,8 @@ use App\Http\Controllers\ApiController;
 use Modules\Profile\Http\Requests\UpdateProfileRequest;
 use Modules\Profile\Http\Requests\CreateProfileRequest;
 use Modules\Profile\Http\Requests\VerifyEmailChangeRequest; // handles both email & phone (can rename later)
+use Modules\Profile\Http\Requests\SendTwoFactorRequest;
+use Modules\Profile\Http\Requests\VerifyTwoFactorRequest;
 use Modules\Profile\Http\Requests\SetLanguageRequest;
 use Modules\Profile\Services\UserProfileService;
 use Modules\Profile\Services\PswProfileService;
@@ -172,6 +174,50 @@ class ProfileController extends ApiController
     {
         return $this->executeService(
             fn() => $this->pswProfileService->verifyContactChange($request->getSanitizedData())
+        );
+    }
+
+    /**
+     * Send two-factor OTP for current authenticated user
+     */
+    public function sendTwoFactor(SendTwoFactorRequest $request): JsonResponse
+    {
+        return $this->executeService(
+            fn() => $this->userProfileService->sendTwoFactor($request->getSanitizedData()),
+            'Two-factor OTP sent'
+        );
+    }
+
+    /**
+     * Verify two-factor OTP and enable 2FA for user
+     */
+    public function verifyTwoFactor(VerifyTwoFactorRequest $request): JsonResponse
+    {
+        return $this->executeService(
+            fn() => $this->userProfileService->verifyTwoFactor($request->getSanitizedData()),
+            'Two-factor enabled'
+        );
+    }
+
+    /**
+     * Send two-factor OTP for authenticated PSW
+     */
+    public function sendPswTwoFactor(SendTwoFactorRequest $request): JsonResponse
+    {
+        return $this->executeService(
+            fn() => $this->pswProfileService->sendTwoFactor($request->getSanitizedData()),
+            'Two-factor OTP sent'
+        );
+    }
+
+    /**
+     * Verify two-factor OTP and enable 2FA for PSW
+     */
+    public function verifyPswTwoFactor(VerifyTwoFactorRequest $request): JsonResponse
+    {
+        return $this->executeService(
+            fn() => $this->pswProfileService->verifyTwoFactor($request->getSanitizedData()),
+            'Two-factor enabled'
         );
     }
 
