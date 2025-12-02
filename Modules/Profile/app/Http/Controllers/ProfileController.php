@@ -98,10 +98,9 @@ class ProfileController extends ApiController
      * Get Profile by ID API (Admin only)
      * TODO: Implement proper admin functionality
      *
-     * @param int $userId
      * @return JsonResponse
      */
-    public function show(int $userId): JsonResponse
+    public function show(): JsonResponse
     {
         return $this->executeService(
             fn() => $this->userProfileService->getProfile()

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Profile\Http\Controllers\ProfileController;
 use Modules\Profile\Http\Controllers\UserProfileController;
 use Modules\Profile\Http\Controllers\PswProfileController;
+use Modules\Profile\Http\Controllers\AdminProfileController;
 use Modules\Profile\Http\Controllers\PreferenceController;
 use Modules\Profile\Http\Controllers\NotificationController;
 use Modules\Profile\Http\Controllers\PasswordController;
@@ -77,11 +78,8 @@ Route::middleware(['auth:admin-api'])->prefix('v1/admin')->group(function () {
     Route::put('change-password', [PasswordController::class, 'changeAdminPassword']);
     
     // Profile management routes
-    Route::group(['prefix' => 'profiles'], function() {
-        Route::post('/', [ProfileController::class, 'store']); 
-        Route::get('/{userId}', [ProfileController::class, 'show']); 
-        Route::put('/{userId}', [ProfileController::class, 'updateById']); 
-        Route::delete('/{userId}', [ProfileController::class, 'destroyById']); 
+    Route::group(['prefix' => 'profile'], function() { 
+        Route::get('/', [AdminProfileController::class, 'show']);
     });
 
     // Admin preferences management

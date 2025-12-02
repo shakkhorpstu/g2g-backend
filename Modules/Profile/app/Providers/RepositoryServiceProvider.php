@@ -32,6 +32,12 @@ class RepositoryServiceProvider extends ServiceProvider
         // Bind PSW Profile Repository
         $this->app->bind(PswProfileRepositoryInterface::class, PswProfileRepository::class);
 
+        // Bind Admin Profile Repository
+        $this->app->bind(
+            \Modules\Profile\Contracts\Repositories\AdminProfileRepositoryInterface::class,
+            \Modules\Profile\Repositories\AdminProfileRepository::class
+        );
+
         // Bind PSW Service Category Repository
         $this->app->bind(
             \Modules\Profile\Contracts\Repositories\PswServiceCategoryRepositoryInterface::class,

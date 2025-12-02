@@ -63,7 +63,7 @@ class FileStorageService extends BaseService
                 'original_name' => $file->getClientOriginalName(),
                 'stored_name' => $storedName,
                 'file_path' => $filePath,
-                'file_url' => $this->getUrl($filePath),
+                // 'file_url' => $this->getUrl($filePath),
                 'mime_type' => $file->getMimeType(),
                 'file_size' => $file->getSize(),
                 'uploaded_by_type' => $uploader ? get_class($uploader) : null,
@@ -74,6 +74,9 @@ class FileStorageService extends BaseService
 
             // Create file record
             $fileRecord = $this->fileStorageRepository->create($fileData);
+            if(!$fileRecord) {
+                $fileRecord->file_url = $this->getUrl($filePath);
+            }
 
             return $fileRecord->toArray();
         });
