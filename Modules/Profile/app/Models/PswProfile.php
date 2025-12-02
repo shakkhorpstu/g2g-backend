@@ -29,6 +29,7 @@ class PswProfile extends Model
         'has_own_vehicle',
         'has_wheelchair_accessible_vehicle',
         'min_booking_slot',
+        'bio'
     ];
 
     protected $casts = [

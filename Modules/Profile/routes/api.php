@@ -62,6 +62,7 @@ Route::middleware(['auth:psw-api'])->prefix('v1/psw')->group(function () {
         Route::get('/availability/schedule', [PswAvailabilityController::class, 'index']);
         Route::put('/availability/schedule', [PswAvailabilityController::class, 'sync']);
         Route::put('/rates', [PswProfileController::class, 'setRates']);
+        Route::put('/bio', [PswProfileController::class, 'updateBio']);
         Route::get('/preferences', [PswProfileController::class, 'preferences']);
         Route::put('/preferences', [PswProfileController::class, 'syncPreferences']);
         Route::get('/services', [PswServiceCategoryController::class, 'index']);
