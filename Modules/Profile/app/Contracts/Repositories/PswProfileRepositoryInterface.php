@@ -51,10 +51,10 @@ interface PswProfileRepositoryInterface
     public function delete(int $pswId): bool;
 
     /**
-     * Get PSW with profile
+     * Get PSW with profile and profile picture
      *
      * @param int $pswId
-     * @return Psw|null
+     * @return array|null
      */
-    public function getPswWithProfile(int $pswId): ?Psw;
+    public function getPswWithProfile(int $pswId): ?array;
 }

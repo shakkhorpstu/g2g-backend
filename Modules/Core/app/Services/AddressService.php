@@ -211,4 +211,46 @@ class AddressService extends BaseService
             return $this->success(null, 'Default address updated successfully');
         });
     }
+
+    /**
+     * Update or create postal code for default address
+     *
+     * @param string $postalCode
+     * @return array
+     */
+    public function updateOrCreatePostalCode(string $postalCode): array
+    {
+        return $this->executeWithTransaction(function () use ($postalCode) {
+            $user = $this->getAuthenticatedUserOrFail($this->allowedGuards);
+
+            // Check if default address exists
+            $defaultAddress = $this->addressRepository->getDefaultForOwner($user);
+
+            if ($defaultAddress) {
+                // Update existing default address
+                $this->addressRepository->update($defaultAddress, [
+                    'postal_code' => $postalCode,
+                ]);
+                $defaultAddress->refresh();
+
+                return $this->success($defaultAddress, 'Postal code updated successfully');
+            } else {
+                // Create new address with postal code as default
+                $data = [
+                    'addressable_type' => get_class($user),
+                    'addressable_id' => $user->id,
+                    'postal_code' => $postalCode,
+                    'is_default' => true,
+                    'address_line' => 'N/A',
+                    'city' => 'N/A',
+                    'province' => 'N/A',
+                    'country_id' => 1
+                ];
+
+                $address = $this->addressRepository->create($data);
+
+                return $this->success($address, 'Default address created with postal code', 201);
+            }
+        });
+    }
 }

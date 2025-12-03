@@ -32,6 +32,12 @@ class RepositoryServiceProvider extends ServiceProvider
         // Bind PSW Profile Repository
         $this->app->bind(PswProfileRepositoryInterface::class, PswProfileRepository::class);
 
+        // Bind Admin Profile Repository
+        $this->app->bind(
+            \Modules\Profile\Contracts\Repositories\AdminProfileRepositoryInterface::class,
+            \Modules\Profile\Repositories\AdminProfileRepository::class
+        );
+
         // Bind PSW Service Category Repository
         $this->app->bind(
             \Modules\Profile\Contracts\Repositories\PswServiceCategoryRepositoryInterface::class,
@@ -42,6 +48,18 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(
             \Modules\Profile\Contracts\Repositories\PswAvailabilityRepositoryInterface::class,
             \Modules\Profile\Repositories\PswAvailabilityRepository::class
+        );
+
+        // Bind Document Type Repository
+        $this->app->bind(
+            \Modules\Profile\Contracts\Repositories\DocumentTypeRepositoryInterface::class,
+            \Modules\Profile\Repositories\DocumentTypeRepository::class
+        );
+
+        // Bind Profile Document Repository
+        $this->app->bind(
+            \Modules\Profile\Contracts\Repositories\ProfileDocumentRepositoryInterface::class,
+            \Modules\Profile\Repositories\ProfileDocumentRepository::class
         );
     }
 

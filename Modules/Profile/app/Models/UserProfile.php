@@ -46,4 +46,14 @@ class UserProfile extends Model
     {
         return $this->morphMany(ProfilePreference::class, 'owner');
     }
+
+    /**
+     * Get the profile picture file for this profile.
+     */
+    public function profilePicture()
+    {
+        return $this->morphOne(\App\Shared\Models\FileStorage::class, 'fileable')
+            ->where('file_type', 'profile_picture')
+            ->orderBy('created_at', 'desc');
+    }
 }

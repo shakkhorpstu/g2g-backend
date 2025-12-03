@@ -95,25 +95,20 @@ class UserAuthService extends BaseService
             event(new UserRegistered($user, $data));
 
             // Create default address with static data
-            $this->createDefaultAddress($user);
+            $address = $data['address'] ?? [];
+            $this->createDefaultAddress($user, $address);
 
-            // Send account verification OTP to email
-            // $this->otpService->resendOtp(
+            // Send account verification OTP to email and include OTP context in response
+            // $otp = $this->otpService->resendOtp(
             //     $user->email,
             //     'account_verification',
             //     get_class($user),
             //     $user->id
             // );
 
-            // Generate token using Passport
-            $token = $user->createToken('auth_token')->accessToken;
-
-            return $this->success([
-                'user' => $user,
-                'token' => $token,
-                'token_type' => 'Bearer',
-                'message' => 'Please verify your email with the OTP sent to your email address'
-            ], 'User registered successfully. Verification OTP sent to email.', 201);
+            $user->setAttribute('otpable_type', get_class($user));
+            $user->setAttribute('otpable_id', $user->id);
+            return $this->success($user, 'User registered successfully.', 201);
         });
     }
 
@@ -121,20 +116,21 @@ class UserAuthService extends BaseService
      * Create default address for newly registered user
      *
      * @param mixed $user
+     * @param array $address
      * @return void
      */
-    protected function createDefaultAddress($user): void
+    protected function createDefaultAddress($user, $address = []): void
     {
         // Static default address data (will be replaced with form data later)
         $addressData = [
             'addressable_type' => get_class($user),
             'addressable_id' => $user->id,
-            'label' => 'HOME',
-            'address_line' => '123 Default Street',
-            'city' => 'Default City',
-            'province' => 'Default Province',
-            'postal_code' => '00000',
-            'country_id' => 1, // Assuming country with ID 1 exists
+            'label' => $address['label'] ?? 'HOME',
+            'address_line' => $address['address_line'] ?? '',
+            'city' => $address['city'] ?? '',
+            'province' => $address['province'] ?? '',
+            'postal_code' => $address['postal_code'] ?? '',
+            'country_id' => $address['country_id'] ?? env('DEFAULT_COUNTRTY_ID', 1), // Assuming country with ID 1 exists
             'is_default' => true,
             'created_at' => now(),
             'updated_at' => now(),
@@ -377,7 +373,7 @@ class UserAuthService extends BaseService
 
             // Verify OTP - will throw on failure
             $this->otpService->verifyOtp(
-                $data['email'],
+                $data['identifier'],
                 $data['otp_code'],
                 'account_verification'
             );
@@ -385,9 +381,7 @@ class UserAuthService extends BaseService
             // Mark user as verified
             $user = $this->userRepository->markEmailAsVerified($user);
 
-            return $this->success([
-                'user' => $user
-            ], 'Account verified successfully');
+            return $this->success($user, 'Congratulations! Your account has been verified. You may now access all features');
         });
     }
 }

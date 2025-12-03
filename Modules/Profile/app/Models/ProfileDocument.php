@@ -15,7 +15,6 @@ class ProfileDocument extends Model
         'documentable_type',
         'documentable_id',
         'document_type_id',
-        'document_side_key',
         'status',
         'uploaded_by_type',
         'uploaded_by_id',
@@ -45,11 +44,11 @@ class ProfileDocument extends Model
 
     public function frontFile()
     {
-        return $this->files()->where('file_category', 'front')->latest()->first();
+        return $this->files()->where('file_type', 'document_front')->latest()->first();
     }
 
     public function backFile()
     {
-        return $this->files()->where('file_category', 'back')->latest()->first();
+        return $this->files()->where('file_type', 'document_back')->latest()->first();
     }
 }

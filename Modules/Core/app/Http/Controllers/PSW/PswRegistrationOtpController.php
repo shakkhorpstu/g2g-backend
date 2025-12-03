@@ -16,7 +16,7 @@ class PswRegistrationOtpController extends ApiController
 
     /**
      * Send OTP to PSW's phone and/or email
-     * 
+     *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -30,7 +30,7 @@ class PswRegistrationOtpController extends ApiController
 
     /**
      * Verify OTP code for PSW
-     * 
+     *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */

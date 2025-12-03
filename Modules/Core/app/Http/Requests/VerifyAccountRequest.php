@@ -19,7 +19,11 @@ class VerifyAccountRequest extends BaseCoreRequest
             'otp_code' => [
                 'required',
                 'string',
-                'size:6'
+                'size:4'
+            ],
+            'identifier' => [
+                'required',
+                'string'
             ]
         ];
     }

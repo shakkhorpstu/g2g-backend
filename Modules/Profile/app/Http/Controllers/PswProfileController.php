@@ -11,6 +11,7 @@ use Modules\Profile\Http\Requests\VerifyTwoFactorRequest;
 use Modules\Profile\Http\Requests\SetAvailabilityRequest;
 use Modules\Profile\Http\Requests\SetRatesRequest;
 use Modules\Profile\Http\Requests\SyncPreferencesRequest;
+use Modules\Profile\Http\Requests\UpdateBioRequest;
 use Modules\Profile\Services\PswProfileService;
 
 class PswProfileController extends ApiController
@@ -46,6 +47,14 @@ class PswProfileController extends ApiController
     public function setRates(SetRatesRequest $request): JsonResponse
     {
         return $this->executeService(fn() => $this->pswProfileService->setRates($request->validated()), 'Rates updated');
+    }
+
+    /**
+     * Update PSW bio
+     */
+    public function updateBio(UpdateBioRequest $request): JsonResponse
+    {
+        return $this->executeService(fn() => $this->pswProfileService->updateBio($request->getSanitizedData()));
     }
 
     /**

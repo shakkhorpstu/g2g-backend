@@ -29,6 +29,7 @@ class PswProfile extends Model
         'has_own_vehicle',
         'has_wheelchair_accessible_vehicle',
         'min_booking_slot',
+        'bio'
         '2fa_enabled',
         '2fa_identifier_key',
     ];
@@ -69,5 +70,15 @@ class PswProfile extends Model
     public function availabilitySlots()
     {
         return $this->hasMany(PswAvailabilitySlot::class, 'psw_profile_id');
+    }
+
+    /**
+     * Get the profile picture file for this profile.
+     */
+    public function profilePicture()
+    {
+        return $this->morphOne(\App\Shared\Models\FileStorage::class, 'fileable')
+            ->where('file_type', 'profile_picture')
+            ->orderBy('created_at', 'desc');
     }
 }

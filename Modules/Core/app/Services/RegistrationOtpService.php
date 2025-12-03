@@ -129,8 +129,8 @@ class RegistrationOtpService extends BaseService
         // Use phone as primary identifier
         $identifier = $phone;
 
-        // Generate 6-digit OTP
-        $otpCode = str_pad((string) random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
+        // Generate 4-digit OTP
+        $otpCode = str_pad((string) random_int(1000, 9999), 4, '0', STR_PAD_LEFT);
 
         // Invalidate any previous pending OTPs for this user
         OtpVerification::where('otpable_id', $user->id)
@@ -159,6 +159,7 @@ class RegistrationOtpService extends BaseService
             'otp_id' => $otp->id,
             'identifier' => $identifier,
             'user_id' => $user->id,
+            'code' => $otpCode,
             'type' => 'account_verification'
         ]);
 

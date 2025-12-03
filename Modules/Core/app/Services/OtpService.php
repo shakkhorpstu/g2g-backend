@@ -25,9 +25,20 @@ class OtpService extends BaseService
         return $this->executeWithTransaction(function () use ($identifier, $type, $otpableType, $otpableId) {
             // Find existing pending OTP
             $existingOtp = $this->otpRepository->findByOtpableAndType($otpableType, $otpableId, $type);
-            
-            if ($existingOtp && !$existingOtp->isExpired()) {
-                $this->fail('OTP already sent. Please wait before requesting a new one.', 429);
+            if ($existingOtp) {
+                $sentAt = $existingOtp->created_at ?? null;
+                if ($sentAt) {
+                    if (!($sentAt instanceof \Carbon\Carbon)) {
+                        $sentAt = \Carbon\Carbon::parse($sentAt);
+                    }
+
+                    $secondsSinceSent = now()->getTimestamp() - $sentAt->getTimestamp();
+                    if ($secondsSinceSent < 0) {
+                        // logger()->warning('OTP created_at is in the future', ['otp_id' => $existingOtp->id, 'created_at' => (string) $sentAt, 'now' => (string) now()]);
+                    } elseif ($secondsSinceSent < 120) {
+                        $this->fail('OTP already sent. Please wait a couple of minutes before requesting a new one.', 429);
+                    }
+                }
             }
 
             // Generate new OTP
@@ -102,6 +113,6 @@ class OtpService extends BaseService
      */
     private function generateOtpCode(): string
     {
-        return str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+        return str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
     }
 }

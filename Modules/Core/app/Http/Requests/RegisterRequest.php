@@ -48,11 +48,46 @@ class RegisterRequest extends BaseCoreRequest
                 'max:20',
                 'regex:/^[\+]?[\d\-\s\(\)]+$/' // Phone number format
             ],
-            // 'address' => [
-            //     'sometimes',
-            //     'string',
-            //     'max:500'
-            // ]
+            'address' => [
+                'sometimes',
+                'array'
+            ],
+            'address.latitude' => [
+                'sometimes',
+                'required_with:address',
+                'string',
+                'max:32'
+            ],
+            'address.longitude' => [
+                'sometimes',
+                'required_with:address',
+                'string',
+                'max:32'
+            ],
+            'address.address_line' => [
+                'sometimes',
+                'required_with:address',
+                'string',
+                'max:500'
+            ],
+            'address.city' => [
+                'sometimes',
+                'required_with:address',
+                'string',
+                'max:255'
+            ],
+            'address.province' => [
+                'sometimes',
+                'required_with:address',
+                'string',
+                'max:255'
+            ],
+            'address.postal_code' => [
+                'sometimes',
+                'required_with:address',
+                'string',
+                'max:32'
+            ],
         ];
     }
 
@@ -77,8 +112,29 @@ class RegisterRequest extends BaseCoreRequest
             $data['phone'] = trim($data['phone']);
         }
         
-        if (isset($data['address'])) {
-            $data['address'] = trim($data['address']);
+        if (isset($data['address']) && is_array($data['address'])) {
+            $addr = $data['address'];
+            $clean = [];
+            if (isset($addr['latitude'])) {
+                $clean['latitude'] = trim((string) $addr['latitude']);
+            }
+            if (isset($addr['longitude'])) {
+                $clean['longitude'] = trim((string) $addr['longitude']);
+            }
+            if (isset($addr['address_line'])) {
+                $clean['address_line'] = trim($addr['address_line']);
+            }
+            if (isset($addr['city'])) {
+                $clean['city'] = trim($addr['city']);
+            }
+            if (isset($addr['province'])) {
+                $clean['province'] = trim($addr['province']);
+            }
+            if (isset($addr['postal_code'])) {
+                $clean['postal_code'] = trim((string) $addr['postal_code']);
+            }
+
+            $data['address'] = $clean;
         }
         
         if (isset($data['bio'])) {

@@ -302,6 +302,32 @@ class PswProfileService extends BaseService
     }
 
     /**
+     * Update PSW bio
+     *
+     * @param array $data
+     * @return array
+     */
+    public function updateBio(array $data): array
+    {
+        return $this->executeWithTransaction(function () use ($data) {
+            $psw = $this->getAuthenticatedUserOrFail(['psw-api'], 'PSW not authenticated');
+
+            $profile = $this->pswProfileRepository->findByPswId($psw->id);
+            if (! $profile) {
+                $this->createInitialProfile($psw->id, []);
+            }
+            
+            $this->pswProfileRepository->update($psw->id, [
+                'bio' => $data['bio'] ?? null,
+            ]);
+
+            $pswWithProfile = $this->pswProfileRepository->getPswWithProfile($psw->id);
+
+            return $this->success($pswWithProfile, 'Bio updated successfully');
+        });
+    }
+
+    /**
      * List preferences attached to authenticated PSW profile
      *
      * @return array

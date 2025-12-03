@@ -51,10 +51,10 @@ interface UserProfileRepositoryInterface
     public function delete(int $userId): bool;
 
     /**
-     * Get user with profile
+     * Get user with profile and profile picture
      *
      * @param int $userId
-     * @return User|null
+     * @return array|null
      */
-    public function getUserWithProfile(int $userId): ?User;
+    public function getUserWithProfile(int $userId): ?array;
 }

@@ -17,16 +17,22 @@ use Modules\Core\Http\Controllers\PSW\PswRegistrationOtpController;
 Route::prefix('v1')->group(function () {
     // Client/User authentication
     Route::post('client-register', [UserAuthController::class, 'register']);
+    Route::post('client-register/send-otp', [ClientRegistrationOtpController::class, 'sendOtp']);
+    Route::post('client-register/verify-account', [UserAuthController::class, 'verifyAccount']);
     Route::post('client-login', [UserAuthController::class, 'login']);
     Route::post('verify-account', [UserAuthController::class, 'verifyAccount']);
 
+    // Route::post('registration/verify-otp', [ClientRegistrationOtpController::class, 'verifyOtp']);
     // Forgot & Reset Password
     Route::post('forgot-password', [UserAuthController::class, 'forgotPassword']);
     Route::post('reset-password', [UserAuthController::class, 'resetPassword']);
 
     // PSW authentication
     Route::post('psw-register', [PswAuthController::class, 'register']);
+    Route::post('psw-register/send-otp', [PswRegistrationOtpController::class, 'sendOtp']);
+    Route::post('psw-register/verify-account', [PswAuthController::class, 'verifyAccount']);
     Route::post('psw-login', [PswAuthController::class, 'login']);
+    // Route::post('psw/registration/verify-otp', [PswRegistrationOtpController::class, 'verifyOtp']);
     Route::post('psw-verify-account', [PswAuthController::class, 'verifyAccount']);
 
     // PSW Forgot & Reset Password
@@ -43,6 +49,7 @@ Route::prefix('v1')->group(function () {
 
     // OTP routes
     Route::post('resend-otp', [OtpController::class, 'resendOtp']);
+    // Route::post('verify-otp', [OtpController::class, 'verifyOtp']);
     Route::post('verify-otp', [OtpController::class, 'verifyOtp']);
     Route::post('verify-2fa', [AuthController::class, 'verifyTwoFactor']);
 
@@ -67,6 +74,7 @@ Route::middleware(['auth:api'])->prefix('v1')->group(function () {
         Route::get('/', [AddressController::class, 'index']);
         Route::post('/', [AddressController::class, 'store']);
         Route::get('/default', [AddressController::class, 'getDefault']);
+        Route::put('/postal-code', [AddressController::class, 'updatePostalCode']);
         Route::get('/{id}', [AddressController::class, 'show']);
         Route::put('/{id}', [AddressController::class, 'update']);
         Route::delete('/{id}', [AddressController::class, 'destroy']);
@@ -88,6 +96,7 @@ Route::middleware(['auth:psw-api'])->prefix('v1')->group(function () {
         Route::get('/', [AddressController::class, 'index']);
         Route::post('/', [AddressController::class, 'store']);
         Route::get('/default', [AddressController::class, 'getDefault']);
+        Route::put('/postal-code', [AddressController::class, 'updatePostalCode']);
         Route::get('/{id}', [AddressController::class, 'show']);
         Route::put('/{id}', [AddressController::class, 'update']);
         Route::delete('/{id}', [AddressController::class, 'destroy']);
