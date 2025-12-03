@@ -5,6 +5,7 @@ namespace Modules\Core\Http\Controllers;
 use App\Http\Controllers\ApiController;
 use Modules\Core\Http\Requests\StoreAddressRequest;
 use Modules\Core\Http\Requests\UpdateAddressRequest;
+use Modules\Core\Http\Requests\UpdatePostalCodeRequest;
 use Modules\Core\Services\AddressService;
 use Illuminate\Http\JsonResponse;
 
@@ -128,6 +129,19 @@ class AddressController extends ApiController
         return $this->executeService(
             fn() => $this->addressService->getDefaultAddress(),
             'Default address retrieved successfully'
+        );
+    }
+
+    /**
+     * Update or create postal code for default address
+     *
+     * @param UpdatePostalCodeRequest $request
+     * @return JsonResponse
+     */
+    public function updatePostalCode(UpdatePostalCodeRequest $request): JsonResponse
+    {
+        return $this->executeService(
+            fn() => $this->addressService->updateOrCreatePostalCode($request->input('postal_code'))
         );
     }
 }

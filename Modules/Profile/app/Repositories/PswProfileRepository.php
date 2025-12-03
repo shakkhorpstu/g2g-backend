@@ -149,6 +149,13 @@ class PswProfileRepository implements PswProfileRepositoryInterface
             return null;
         }
 
+        // Get default address
+        $defaultAddress = DB::table('addresses')
+            ->where('addressable_type', 'Modules\\Core\\Models\\Psw')
+            ->where('addressable_id', $pswId)
+            ->where('is_default', true)
+            ->first();
+
         // Map the flat result to nested structure
         return [
             'id' => $result->id,
@@ -183,6 +190,20 @@ class PswProfileRepository implements PswProfileRepositoryInterface
                 'mime_type' => $result->picture_mime_type,
                 'file_size' => $result->picture_file_size,
                 'created_at' => $result->picture_created_at,
+            ] : null,
+            'default_address' => $defaultAddress ? [
+                'id' => $defaultAddress->id,
+                'label' => $defaultAddress->label,
+                'address_line' => $defaultAddress->address_line,
+                'city' => $defaultAddress->city,
+                'province' => $defaultAddress->province,
+                'postal_code' => $defaultAddress->postal_code,
+                'country_id' => $defaultAddress->country_id,
+                'latitude' => $defaultAddress->latitude,
+                'longitude' => $defaultAddress->longitude,
+                'is_default' => (bool) $defaultAddress->is_default,
+                'created_at' => $defaultAddress->created_at,
+                'updated_at' => $defaultAddress->updated_at,
             ] : null,
         ];
     }

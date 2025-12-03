@@ -17,7 +17,7 @@ Route::prefix('v1')->group(function () {
     // Client/User authentication
     Route::post('client-register', [UserAuthController::class, 'register']);
     Route::post('client-register/send-otp', [ClientRegistrationOtpController::class, 'sendOtp']);
-     Route::post('client-register/verify-account', [UserAuthController::class, 'verifyAccount']);
+    Route::post('client-register/verify-account', [UserAuthController::class, 'verifyAccount']);
     Route::post('client-login', [UserAuthController::class, 'login']);
     // Route::post('registration/verify-otp', [ClientRegistrationOtpController::class, 'verifyOtp']);
     // Forgot & Reset Password
@@ -63,6 +63,7 @@ Route::middleware(['auth:api'])->prefix('v1')->group(function () {
         Route::get('/', [AddressController::class, 'index']);
         Route::post('/', [AddressController::class, 'store']);
         Route::get('/default', [AddressController::class, 'getDefault']);
+        Route::put('/postal-code', [AddressController::class, 'updatePostalCode']);
         Route::get('/{id}', [AddressController::class, 'show']);
         Route::put('/{id}', [AddressController::class, 'update']);
         Route::delete('/{id}', [AddressController::class, 'destroy']);
@@ -80,6 +81,7 @@ Route::middleware(['auth:psw-api'])->prefix('v1')->group(function () {
         Route::get('/', [AddressController::class, 'index']);
         Route::post('/', [AddressController::class, 'store']);
         Route::get('/default', [AddressController::class, 'getDefault']);
+        Route::put('/postal-code', [AddressController::class, 'updatePostalCode']);
         Route::get('/{id}', [AddressController::class, 'show']);
         Route::put('/{id}', [AddressController::class, 'update']);
         Route::delete('/{id}', [AddressController::class, 'destroy']);
