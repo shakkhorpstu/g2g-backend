@@ -10,6 +10,7 @@ use Modules\Core\Events\PswRegistered;
 use Modules\Core\Services\OtpService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Modules\Profile\Models\PswProfile;
 
 /**
  * PSW Authentication Service
@@ -158,6 +159,24 @@ class PswAuthService extends BaseService
 
             // Update last login
             $this->pswRepository->updateLastLogin($psw);
+
+            // Check 2FA on PSW profile
+            $profile = PswProfile::where('psw_id', $psw->id)->first();
+            if ($profile && !empty($profile->{'2fa_enabled'})) {
+                $identifier = ($profile->{'2fa_identifier_key'} ?? '') === 'phone' ? $psw->phone_number : $psw->email;
+                if (!$identifier) {
+                    $this->fail('Two-factor is enabled but identifier not configured', 422);
+                }
+
+                // Send two-factor OTP
+                $this->otpService->resendOtp($identifier, 'two_factor', get_class($psw), $psw->id);
+
+                return $this->success([
+                    'requires_2fa' => true,
+                    'identifier' => $profile->{'2fa_identifier_key'} ?? null,
+                    'psw' => $psw,
+                ], 'Two-factor authentication required. A verification code has been sent.');
+            }
 
             // Generate token
             $token = $psw->createToken('psw_auth_token')->accessToken;

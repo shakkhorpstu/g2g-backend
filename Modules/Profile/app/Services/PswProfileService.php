@@ -191,6 +191,79 @@ class PswProfileService extends BaseService
     }
 
     /**
+     * Send 2FA OTP to PSW's chosen contact (email or phone)
+     *
+     * @param array $data ['method' => 'email'|'phone']
+     * @return array
+     */
+    public function sendTwoFactor(array $data): array
+    {
+        return $this->executeWithTransaction(function () use ($data) {
+            $psw = $this->getAuthenticatedUserOrFail(['psw-api'], 'PSW not authenticated');
+
+            $method = $data['method'] ?? null;
+            if (!in_array($method, ['email', 'phone'])) {
+                $this->fail('Invalid method. Must be "email" or "phone"', 422);
+            }
+
+            $identifier = $method === 'email' ? $psw->email : $psw->phone_number;
+            if (!$identifier) {
+                $this->fail('No contact information available for selected method', 422);
+            }
+
+            $result = $this->otpService->resendOtp(
+                $identifier,
+                'two_factor',
+                get_class($psw),
+                $psw->id
+            );
+
+            return $this->success($result['data'] ?? [], 'Two-factor OTP sent');
+        });
+    }
+
+    /**
+     * Verify 2FA OTP and enable two factor on PSW profile
+     *
+     * @param array $data ['method' => 'email'|'phone', 'otp_code' => '123456']
+     * @return array
+     */
+    public function verifyTwoFactor(array $data): array
+    {
+        return $this->executeWithTransaction(function () use ($data) {
+            $psw = $this->getAuthenticatedUserOrFail(['psw-api'], 'PSW not authenticated');
+
+            $method = $data['method'] ?? null;
+            $otpCode = $data['otp_code'] ?? null;
+
+            if (!in_array($method, ['email', 'phone'])) {
+                $this->fail('Invalid method. Must be "email" or "phone"', 422);
+            }
+
+            if (!$otpCode) {
+                $this->fail('OTP code is required', 422);
+            }
+
+            $identifier = $method === 'email' ? $psw->email : $psw->phone_number;
+            if (!$identifier) {
+                $this->fail('No contact information available for selected method', 422);
+            }
+
+            $this->otpService->verifyOtp($identifier, $otpCode, 'two_factor');
+
+            // Update psw profile
+            $this->pswProfileRepository->update($psw->id, [
+                '2fa_enabled' => true,
+                '2fa_identifier_key' => $method,
+            ]);
+
+            $pswWithProfile = $this->pswProfileRepository->getPswWithProfile($psw->id);
+
+            return $this->success($pswWithProfile, 'Two-factor authentication enabled');
+        });
+    }
+
+    /**
      * Set hourly rate and driving allowance settings for PSW
      *
      * @param array $data

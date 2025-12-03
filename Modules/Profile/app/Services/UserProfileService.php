@@ -180,4 +180,79 @@ class UserProfileService extends BaseService
             return $this->success(null, 'User profile deleted successfully');
         });
     }
+
+    /**
+     * Send 2FA OTP to user's chosen contact (email or phone)
+     *
+     * @param array $data ['method' => 'email'|'phone']
+     * @return array
+     */
+    public function sendTwoFactor(array $data): array
+    {
+        return $this->executeWithTransaction(function () use ($data) {
+            $user = $this->getAuthenticatedUserOrFail(['api'], 'User not authenticated');
+
+            $method = $data['method'] ?? null;
+            if (!in_array($method, ['email', 'phone'])) {
+                $this->fail('Invalid method. Must be "email" or "phone"', 422);
+            }
+
+            $identifier = $method === 'email' ? $user->email : $user->phone_number;
+            if (!$identifier) {
+                $this->fail('No contact information available for selected method', 422);
+            }
+
+            // Send OTP for two_factor
+            $result = $this->otpService->resendOtp(
+                $identifier,
+                'two_factor',
+                get_class($user),
+                $user->id
+            );
+
+            return $this->success($result['data'] ?? [], 'Two-factor OTP sent');
+        });
+    }
+
+    /**
+     * Verify 2FA OTP and enable two factor on profile
+     *
+     * @param array $data ['method' => 'email'|'phone', 'otp_code' => '123456']
+     * @return array
+     */
+    public function verifyTwoFactor(array $data): array
+    {
+        return $this->executeWithTransaction(function () use ($data) {
+            $user = $this->getAuthenticatedUserOrFail(['api'], 'User not authenticated');
+
+            $method = $data['method'] ?? null;
+            $otpCode = $data['otp_code'] ?? null;
+
+            if (!in_array($method, ['email', 'phone'])) {
+                $this->fail('Invalid method. Must be "email" or "phone"', 422);
+            }
+
+            if (!$otpCode) {
+                $this->fail('OTP code is required', 422);
+            }
+
+            $identifier = $method === 'email' ? $user->email : $user->phone_number;
+            if (!$identifier) {
+                $this->fail('No contact information available for selected method', 422);
+            }
+
+            // Verify OTP
+            $this->otpService->verifyOtp($identifier, $otpCode, 'two_factor');
+
+            // Update user profile 2FA flags
+            $this->userProfileRepository->update($user->id, [
+                '2fa_enabled' => true,
+                '2fa_identifier_key' => $method,
+            ]);
+
+            $userWithProfile = $this->userProfileRepository->getUserWithProfile($user->id);
+
+            return $this->success($userWithProfile, 'Two-factor authentication enabled');
+        });
+    }
 }

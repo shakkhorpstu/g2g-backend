@@ -4,12 +4,14 @@ namespace Modules\Core\Http\Controllers;
 
 use Modules\Core\Services\AuthService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Modules\Core\Http\Requests\RegisterRequest;
 use Modules\Core\Http\Requests\LoginRequest;
 use Modules\Core\Http\Requests\AdminLoginRequest;
 use Modules\Core\Http\Requests\ChangePasswordRequest;
 use Modules\Core\Http\Requests\PswRegisterRequest;
 use Modules\Core\Http\Requests\PswLoginRequest;
+use Modules\Core\Http\Requests\VerifyTwoFactorRequest;
 use App\Http\Controllers\ApiController;
 
 /**
@@ -144,6 +146,17 @@ class AuthController extends ApiController
         return $this->executeService(
             fn() => $this->authService->pswLogin($request->getSanitizedData()),
             'PSW login successful'
+        );
+    }
+
+    /**
+     * Verify two-factor login OTP and create token
+     */
+    public function verifyTwoFactor(VerifyTwoFactorRequest $request): JsonResponse
+    {
+        return $this->executeService(
+            fn() => $this->authService->verifyTwoFactor($request->getSanitizedData()),
+            'Login successful'
         );
     }
 

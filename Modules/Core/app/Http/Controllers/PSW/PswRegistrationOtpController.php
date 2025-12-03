@@ -2,11 +2,13 @@
 
 namespace Modules\Core\Http\Controllers\PSW;
 
-use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
+use Illuminate\Http\JsonResponse;
+use Modules\Core\Http\Requests\PSW\SendOtpRequest;
+use Modules\Core\Http\Requests\PSW\VerifyOtpRequest;
+use App\Http\Controllers\ApiController;
 use Modules\Core\Services\RegistrationOtpService;
 
-class PswRegistrationOtpController extends Controller
+class PswRegistrationOtpController extends ApiController
 {
     public function __construct(protected RegistrationOtpService $service)
     {
@@ -14,33 +16,29 @@ class PswRegistrationOtpController extends Controller
 
     /**
      * Send OTP to PSW's phone and/or email
-     * 
+     *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function sendOtp(Request $request)
+    public function sendOtp(SendOtpRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'psw_id' => 'required|integer',
-            'phone' => 'required|string|min:6|max:20',
-        ]);
-
-        return response()->json($this->service->sendOtpForPsw($validated));
+        return $this->executeService(
+            fn() => $this->service->sendOtpForPsw($request->getSanitizedData()),
+            'OTP sent to provided phone number'
+        );
     }
 
     /**
      * Verify OTP code for PSW
-     * 
+     *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function verifyOtp(Request $request)
+    public function verifyOtp(VerifyOtpRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'user_id' => 'required|integer',
-            'otp_code' => 'required|string|size:6',
-        ]);
-
-        return response()->json($this->service->verifyOtpForPsw($validated));
+        return $this->executeService(
+            fn() => $this->service->verifyOtpForPsw($request->getSanitizedData()),
+            'Your account has been verified successfully. Please log in'
+        );
     }
 }

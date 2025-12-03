@@ -19,7 +19,7 @@ class VerifyAccountRequest extends BaseCoreRequest
             'otp_code' => [
                 'required',
                 'string',
-                'size:4'
+                'regex:/^\\d{4,6}$/'
             ],
             'identifier' => [
                 'required',
@@ -37,7 +37,7 @@ class VerifyAccountRequest extends BaseCoreRequest
             'email.required' => 'Email address is required.',
             'email.email' => 'Please provide a valid email address.',
             'otp_code.required' => 'OTP code is required.',
-            'otp_code.size' => 'OTP code must be 6 digits.'
+            'otp_code.regex' => 'OTP code must be 4 to 6 digits.'
         ]);
     }
 }

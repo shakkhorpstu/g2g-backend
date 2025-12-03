@@ -7,6 +7,8 @@ use Illuminate\Http\JsonResponse;
 use Modules\Profile\Http\Requests\UpdateProfileRequest;
 use Modules\Profile\Http\Requests\CreateProfileRequest;
 use Modules\Profile\Http\Requests\VerifyEmailChangeRequest;
+use Modules\Profile\Http\Requests\SendTwoFactorRequest;
+use Modules\Profile\Http\Requests\VerifyTwoFactorRequest;
 use Modules\Profile\Services\UserProfileService;
 
 class UserProfileController extends ApiController
@@ -37,6 +39,16 @@ class UserProfileController extends ApiController
     public function destroy(): JsonResponse
     {
         return $this->executeService(fn() => $this->userProfileService->deleteProfile());
+    }
+
+    public function sendTwoFactor(SendTwoFactorRequest $request): JsonResponse
+    {
+        return $this->executeService(fn() => $this->userProfileService->sendTwoFactor($request->getSanitizedData()), 'Two-factor OTP sent');
+    }
+
+    public function verifyTwoFactor(VerifyTwoFactorRequest $request): JsonResponse
+    {
+        return $this->executeService(fn() => $this->userProfileService->verifyTwoFactor($request->getSanitizedData()), 'Two-factor enabled');
     }
 
     public function store(CreateProfileRequest $request): JsonResponse

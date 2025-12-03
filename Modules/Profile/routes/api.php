@@ -21,6 +21,8 @@ Route::middleware(['auth:api'])->prefix('v1')->group(function () {
         Route::get('/', [UserProfileController::class, 'index']);
         Route::put('/', [UserProfileController::class, 'update']);
         Route::post('/verify-contact-change', [UserProfileController::class, 'verifyContactChange']);
+        Route::post('/two-factor/send', [UserProfileController::class, 'sendTwoFactor']);
+        Route::post('/two-factor/verify', [UserProfileController::class, 'verifyTwoFactor']);
     });
     
     // Language preference
@@ -57,6 +59,8 @@ Route::middleware(['auth:psw-api'])->prefix('v1/psw')->group(function () {
         Route::get('/', [PswProfileController::class, 'show']);
         Route::put('/', [PswProfileController::class, 'update']); 
         Route::post('/verify-contact-change', [PswProfileController::class, 'verifyContactChange']);
+            Route::post('/two-factor/send', [PswProfileController::class, 'sendTwoFactor']);
+            Route::post('/two-factor/verify', [PswProfileController::class, 'verifyTwoFactor']);
         Route::put('/availability', [PswProfileController::class, 'setAvailability']);
         // Full availability schedule (days + slots)
         Route::get('/availability/schedule', [PswAvailabilityController::class, 'index']);

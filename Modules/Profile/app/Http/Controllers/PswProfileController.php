@@ -6,6 +6,8 @@ use App\Http\Controllers\ApiController;
 use Illuminate\Http\JsonResponse;
 use Modules\Profile\Http\Requests\UpdateProfileRequest;
 use Modules\Profile\Http\Requests\VerifyEmailChangeRequest;
+use Modules\Profile\Http\Requests\SendTwoFactorRequest;
+use Modules\Profile\Http\Requests\VerifyTwoFactorRequest;
 use Modules\Profile\Http\Requests\SetAvailabilityRequest;
 use Modules\Profile\Http\Requests\SetRatesRequest;
 use Modules\Profile\Http\Requests\SyncPreferencesRequest;
@@ -73,5 +75,15 @@ class PswProfileController extends ApiController
         $data = $request->getSanitized();
 
         return $this->executeService(fn() => $this->pswProfileService->syncPreferences($data['preferences'] ?? []), 'Preferences synced');
+    }
+
+    public function sendTwoFactor(SendTwoFactorRequest $request): JsonResponse
+    {
+        return $this->executeService(fn() => $this->pswProfileService->sendTwoFactor($request->getSanitizedData()), 'Two-factor OTP sent');
+    }
+
+    public function verifyTwoFactor(VerifyTwoFactorRequest $request): JsonResponse
+    {
+        return $this->executeService(fn() => $this->pswProfileService->verifyTwoFactor($request->getSanitizedData()), 'Two-factor enabled');
     }
 }

@@ -24,24 +24,26 @@ class RegistrationOtpService extends BaseService
      */
     public function sendOtpForClient(array $data): array
     {
-        $userId = $data['user_id'] ?? null;
-        $phone = $data['phone'] ?? null;
+        return $this->executeWithTransaction(function () use ($data) {
+            $userId = $data['user_id'] ?? null;
+            $phone = $data['phone'] ?? null;
 
-        if (!$userId) {
-            $this->fail('user_id is required', 422);
-        }
+            if (!$userId) {
+                $this->fail('user_id is required', 422);
+            }
 
-        $user = $this->userRepository->findById((int) $userId);
-        if (!$user) {
-            $this->fail('User not found', 404);
-        }
+            $user = $this->userRepository->findById((int) $userId);
+            if (!$user) {
+                $this->fail('User not found', 404);
+            }
 
-        // Update phone on user record
-        $this->userRepository->update($user, ['phone_number' => $phone]);
+            // Update phone on user record
+            $this->userRepository->update($user, ['phone_number' => $phone]);
 
-        $email = $user->email ?? null;
+            $email = $user->email ?? null;
 
-        return $this->generateAndSendOtp($user, get_class($user), $phone, $email);
+            return $this->generateAndSendOtp($user, get_class($user), $phone, $email);
+        });
     }
 
     /**
@@ -49,24 +51,26 @@ class RegistrationOtpService extends BaseService
      */
     public function sendOtpForPsw(array $data): array
     {
-        $pswId = $data['psw_id'] ?? null;
-        $phone = $data['phone'] ?? null;
+        return $this->executeWithTransaction(function () use ($data) {
+            $pswId = $data['psw_id'] ?? null;
+            $phone = $data['phone'] ?? null;
 
-        if (!$pswId) {
-            $this->fail('psw_id is required', 422);
-        }
+            if (!$pswId) {
+                $this->fail('psw_id is required', 422);
+            }
 
-        $psw = $this->pswRepository->findById((int) $pswId);
-        if (!$psw) {
-            $this->fail('PSW not found', 404);
-        }
+            $psw = $this->pswRepository->findById((int) $pswId);
+            if (!$psw) {
+                $this->fail('PSW not found', 404);
+            }
 
-        // Update phone on PSW record
-        $this->pswRepository->update($psw, ['phone_number' => $phone]);
+            // Update phone on PSW record
+            $this->pswRepository->update($psw, ['phone_number' => $phone]);
 
-        $email = $psw->email ?? null;
+            $email = $psw->email ?? null;
 
-        return $this->generateAndSendOtp($psw, get_class($psw), $phone, $email);
+            return $this->generateAndSendOtp($psw, get_class($psw), $phone, $email);
+        });
     }
 
     /**
@@ -74,19 +78,21 @@ class RegistrationOtpService extends BaseService
      */
     public function verifyOtpForClient(array $data): array
     {
-        $userId = $data['user_id'] ?? null;
-        $otpCode = $data['otp_code'] ?? null;
+        return $this->executeWithTransaction(function () use ($data) {
+            $userId = $data['user_id'] ?? null;
+            $otpCode = $data['otp_code'] ?? null;
 
-        if (!$userId || !$otpCode) {
-            $this->fail('user_id and otp_code are required', 422);
-        }
+            if (!$userId || !$otpCode) {
+                $this->fail('user_id and otp_code are required', 422);
+            }
 
-        $user = $this->userRepository->findById((int) $userId);
-        if (!$user) {
-            $this->fail('User not found', 404);
-        }
+            $user = $this->userRepository->findById((int) $userId);
+            if (!$user) {
+                $this->fail('User not found', 404);
+            }
 
-        return $this->verifyOtp($user->id, get_class($user), $otpCode);
+            return $this->verifyOtp($user->id, get_class($user), $otpCode);
+        });
     }
 
     /**
@@ -94,19 +100,21 @@ class RegistrationOtpService extends BaseService
      */
     public function verifyOtpForPsw(array $data): array
     {
-        $pswId = $data['user_id'] ?? null;
-        $otpCode = $data['otp_code'] ?? null;
+        return $this->executeWithTransaction(function () use ($data) {
+            $pswId = $data['psw_id'] ?? null;
+            $otpCode = $data['otp_code'] ?? null;
 
-        if (!$pswId || !$otpCode) {
-            $this->fail('user_id and otp_code are required', 422);
-        }
+            if (!$pswId || !$otpCode) {
+                $this->fail('psw_id and otp_code are required', 422);
+            }
 
-        $psw = $this->pswRepository->findById((int) $pswId);
-        if (!$psw) {
-            $this->fail('PSW not found', 404);
-        }
+            $psw = $this->pswRepository->findById((int) $pswId);
+            if (!$psw) {
+                $this->fail('PSW not found', 404);
+            }
 
-        return $this->verifyOtp($psw->id, get_class($psw), $otpCode);
+            return $this->verifyOtp($psw->id, get_class($psw), $otpCode);
+        });
     }
 
     /**
