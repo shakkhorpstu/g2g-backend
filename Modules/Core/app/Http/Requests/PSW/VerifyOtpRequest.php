@@ -15,7 +15,7 @@ class VerifyOtpRequest extends FormRequest
     {
         return [
             'psw_id' => 'required|integer',
-            'otp_code' => 'required|string|size:6',
+            'otp_code' => ['required','string','regex:/^\\d{4,6}$/'],
         ];
     }
 

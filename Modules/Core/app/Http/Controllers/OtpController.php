@@ -46,7 +46,7 @@ class OtpController extends ApiController
     {
         $request->validate([
             'identifier' => 'required|string',
-            'otp_code' => 'required|string|size:6',
+            'otp_code' => ['required','string','regex:/^\\d{4,6}$/'],
             'type' => 'required|string|in:account_verification,forgot_password,email_update,phone_update,2fa_login,2fa_enable'
         ]);
 

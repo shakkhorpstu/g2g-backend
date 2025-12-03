@@ -15,7 +15,7 @@ class VerifyTwoFactorRequest extends FormRequest
     {
         return [
             'method' => 'required|string|in:email,phone',
-            'otp_code' => 'required|string|size:6',
+            'otp_code' => ['required','string','regex:/^\d{4,6}$/'],
         ];
     }
 

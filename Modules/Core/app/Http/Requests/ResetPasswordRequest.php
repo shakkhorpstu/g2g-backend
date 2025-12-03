@@ -19,7 +19,7 @@ class ResetPasswordRequest extends BaseCoreRequest
             'otp_code' => [
                 'required',
                 'string',
-                'size:6'
+                'regex:/^\\d{4,6}$/'
             ],
             'new_password' => [
                 'required',
@@ -43,7 +43,7 @@ class ResetPasswordRequest extends BaseCoreRequest
             'email.required' => 'Email address is required.',
             'email.email' => 'Please provide a valid email address.',
             'otp_code.required' => 'OTP code is required.',
-            'otp_code.size' => 'OTP code must be 6 digits.',
+            'otp_code.regex' => 'OTP code must be 4 to 6 digits.',
             'new_password.required' => 'New password is required.',
             'new_password.min' => 'Password must be at least 8 characters.',
             'new_password.confirmed' => 'Password confirmation does not match.',

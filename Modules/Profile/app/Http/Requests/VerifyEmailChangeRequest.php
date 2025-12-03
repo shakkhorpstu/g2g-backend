@@ -27,7 +27,7 @@ class VerifyEmailChangeRequest extends BaseProfileRequest
             'otp_code' => [
                 'required',
                 'string',
-                'size:6'
+                'regex:/^\\d{4,6}$/'
             ]
         ];
     }
@@ -42,7 +42,7 @@ class VerifyEmailChangeRequest extends BaseProfileRequest
             'type.in' => 'Type must be either email or phone.',
             'new_value.required' => 'New value is required.',
             'otp_code.required' => 'OTP code is required.',
-            'otp_code.size' => 'OTP code must be 6 digits.'
+            'otp_code.regex' => 'OTP code must be 4 to 6 digits.'
         ]);
     }
 }

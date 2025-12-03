@@ -14,7 +14,7 @@ class VerifyTwoFactorRequest extends BaseCoreRequest
         return [
             'user_id' => 'required|integer',
             'identifier' => 'required|string',
-            'otp_code' => 'required|string|size:6',
+            'otp_code' => ['required','string','regex:/^\\d{4,6}$/'],
         ];
     }
 
