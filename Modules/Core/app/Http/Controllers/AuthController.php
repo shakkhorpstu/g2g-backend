@@ -11,6 +11,7 @@ use Modules\Core\Http\Requests\AdminLoginRequest;
 use Modules\Core\Http\Requests\ChangePasswordRequest;
 use Modules\Core\Http\Requests\PswRegisterRequest;
 use Modules\Core\Http\Requests\PswLoginRequest;
+use Modules\Core\Http\Requests\VerifyTwoFactorRequest;
 use App\Http\Controllers\ApiController;
 
 /**
@@ -151,15 +152,10 @@ class AuthController extends ApiController
     /**
      * Verify two-factor login OTP and create token
      */
-    public function verifyTwoFactor(Request $request): JsonResponse
+    public function verifyTwoFactor(VerifyTwoFactorRequest $request): JsonResponse
     {
-        $data = $request->validate([
-            'identifier' => 'required|string',
-            'otp_code' => 'required|string|size:6',
-        ]);
-
         return $this->executeService(
-            fn() => $this->authService->verifyTwoFactor($data),
+            fn() => $this->authService->verifyTwoFactor($request->getSanitizedData()),
             'Login successful'
         );
     }

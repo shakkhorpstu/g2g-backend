@@ -193,7 +193,8 @@ class UserAuthService extends BaseService
                 return $this->success([
                     'requires_2fa' => true,
                     'identifier' => $profile->{'2fa_identifier_key'} ?? null,
-                ], 'Two-factor authentication required');
+                    'user' => $user,
+                ], 'Two-factor authentication required. A verification code has been sent.');
             }
 
             // Generate token

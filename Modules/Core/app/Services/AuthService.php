@@ -370,11 +370,39 @@ class AuthService extends BaseService
     public function verifyTwoFactor(array $data): array
     {
         return $this->executeWithTransaction(function () use ($data) {
+            $userId = $data['user_id'] ?? null;
             $identifier = $data['identifier'] ?? null;
             $otpCode = $data['otp_code'] ?? null;
 
-            if (!$identifier || !$otpCode) {
-                $this->fail('identifier and otp_code are required', 422);
+            if (!$userId || !$identifier || !$otpCode) {
+                $this->fail('user_id, identifier and otp_code are required', 422);
+            }
+
+            $expectedType = null;
+            $expectedId = null;
+
+            // Check if identifier belongs to a user record with provided id
+            $user = $this->authRepository->findById((int) $userId);
+            if ($user) {
+                if ($identifier === ($user->email ?? null) || $identifier === ($user->phone_number ?? null)) {
+                    $expectedType = get_class($user);
+                    $expectedId = $user->id;
+                }
+            }
+
+            // If not matched with user, check PSW
+            if (!$expectedType) {
+                $psw = $this->pswRepository->findById((int) $userId);
+                if ($psw) {
+                    if ($identifier === ($psw->email ?? null) || $identifier === ($psw->phone_number ?? null)) {
+                        $expectedType = get_class($psw);
+                        $expectedId = $psw->id;
+                    }
+                }
+            }
+
+            if (!$expectedType || !$expectedId) {
+                $this->fail('The provided identifier does not belong to the given user_id', 422);
             }
 
             // Verify OTP and get otpable info
@@ -385,6 +413,11 @@ class AuthService extends BaseService
 
             if (!$otpableType || !$otpableId) {
                 $this->fail('Invalid OTP verification result', 400);
+            }
+
+            // Ensure OTP belongs to expected account
+            if ($otpableType !== $expectedType || (int) $otpableId !== (int) $expectedId) {
+                $this->fail('OTP does not belong to the provided user_id', 422);
             }
 
             // Instantiate model and find record
