@@ -75,8 +75,8 @@ class FileStorageService extends BaseService
 
             // Create file record
             $fileRecord = $this->fileStorageRepository->create($fileData);
-            if(!$fileRecord) {
-                $fileRecord->file_url = $this->getUrl($filePath);
+            if($fileRecord) {
+                $fileRecord->setAttribute('file_url', $this->getUrl($filePath));
             }
 
             return $fileRecord->toArray();
