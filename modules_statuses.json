@@ -1,5 +1,6 @@
 {
     "Profile": true,
     "Core": true,
-    "Payment": true
+    "Payment": true,
+    "Admin": true
 }

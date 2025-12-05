@@ -35,7 +35,8 @@
             "Database\\Seeders\\": "database/seeders/",
             "Modules\\Core\\": "Modules/Core/app/",
             "Modules\\Profile\\": "Modules/Profile/app/",
-            "Modules\\Payment\\": "Modules/Payment/app/"
+            "Modules\\Payment\\": "Modules/Payment/app/",
+            "Modules\\Admin\\": "Modules/Admin/app/"
         }
     },
     "autoload-dev": {

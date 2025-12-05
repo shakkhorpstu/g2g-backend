@@ -1,0 +1,9 @@
+{
+  "name": "Admin",
+  "alias": "admin",
+  "description": "Admin module",
+  "version": "1.0.0",
+  "providers": [
+    "Modules\\Admin\\Providers\\AdminServiceProvider"
+  ]
+}
