@@ -147,7 +147,7 @@ class PswAuthService extends BaseService
             // Block login if account not verified
             if (!(bool) $psw->is_verified) {
                 $this->fail(
-                    'Account not verified. Please verify your email to continue.',
+                    'Your account is not verified yet. Please verify your account to continue.',
                     403,
                     [
                         'requires_verification' => true,

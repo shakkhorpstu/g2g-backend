@@ -162,7 +162,7 @@ class UserAuthService extends BaseService
             // Block login if account not verified on user record
             if (!(bool) $user->is_verified) {
                 $this->fail(
-                    'Account not verified. Please verify your email to continue.',
+                    'Your account is not verified yet. Please verify your account to continue.',
                     403,
                     [
                         'requires_verification' => true,
