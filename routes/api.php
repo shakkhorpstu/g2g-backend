@@ -43,3 +43,9 @@ Route::prefix('api/v1/test')->group(function () {
         throw new \Illuminate\Auth\Access\AuthorizationException('Test unauthorized access');
     });
 });
+
+// ============== TWILIO DEMO ROUTES ==============
+Route::prefix('v1/twilio')->group(function () {
+    Route::post('/send-demo-message', [\App\Http\Controllers\TwilioController::class, 'sendDemoMessage']);
+    Route::post('/message-status', [\App\Http\Controllers\TwilioController::class, 'getMessageStatus']);
+});
