@@ -180,4 +180,15 @@ class UserProfileService extends BaseService
             return $this->success(null, 'User profile deleted successfully');
         });
     }
+
+    /**
+     * Get user with profile by user ID (for admin use)
+     *
+     * @param int $userId
+     * @return array|null
+     */
+    public function getUserWithProfileById(int $userId): ?array
+    {
+        return $this->userProfileRepository->getUserWithProfile($userId);
+    }
 }

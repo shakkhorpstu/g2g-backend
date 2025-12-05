@@ -409,4 +409,96 @@ class ProfileDocumentRepository implements ProfileDocumentRepositoryInterface
 
         return $result;
     }
+
+    /**
+     * Get all document types with user status and files (for admin use)
+     *
+     * @param string $documentableType
+     * @param int $documentableId
+     * @param string|null $status
+     * @return array
+     */
+    public function getAllDocumentTypesWithUserStatusAndFiles(string $documentableType, int $documentableId, ?string $status = null): array
+    {
+        $query = DB::table('document_types as dt')
+            ->leftJoin('profile_documents as pd', function ($join) use ($documentableType, $documentableId) {
+                $join->on('dt.id', '=', 'pd.document_type_id')
+                    ->where('pd.documentable_type', '=', $documentableType)
+                    ->where('pd.documentable_id', '=', $documentableId);
+            })
+            ->where('dt.active', true)
+            ->select(
+                'dt.id as document_type_id',
+                'dt.title as document_type_title',
+                'dt.key as document_type_key',
+                'dt.both_sided',
+                'dt.description',
+                'pd.id as profile_document_id',
+                'pd.status',
+                'pd.documentable_type',
+                'pd.documentable_id',
+                'pd.uploaded_by_type',
+                'pd.uploaded_by_id',
+                'pd.verified_by_id',
+                'pd.verified_at',
+                'pd.metadata',
+                'pd.admin_notes',
+                'pd.created_at',
+                'pd.updated_at'
+            );
+
+        if ($status) {
+            $query->where('pd.status', $status);
+        }
+
+        $query->orderBy('dt.sort_order', 'asc');
+
+        $documents = $query->get();
+
+        return $documents->map(function ($row) {
+            $result = [
+                'document_type_id' => $row->document_type_id,
+                'document_type_title' => $row->document_type_title,
+                'document_type_key' => $row->document_type_key,
+                'both_sided' => (bool) $row->both_sided,
+                'description' => $row->description,
+                'profile_document_id' => $row->profile_document_id,
+                'status' => $row->status,
+                'verified_at' => $row->verified_at,
+                'admin_notes' => $row->admin_notes,
+                'metadata' => $row->metadata ? json_decode($row->metadata, true) : null,
+                'uploaded_at' => $row->created_at,
+                'front_file' => null,
+                'back_file' => null,
+            ];
+
+            if ($row->profile_document_id) {
+                // Get files if document exists
+                $files = DB::table('file_storages')
+                    ->where('fileable_type', 'Modules\Profile\Models\ProfileDocument')
+                    ->where('fileable_id', $row->profile_document_id)
+                    ->whereIn('file_type', ['document_front', 'document_back'])
+                    ->get();
+
+                foreach ($files as $file) {
+                    $fileData = [
+                        'id' => $file->id,
+                        'name' => $file->original_name,
+                        'url' => $this->fileStorageService->getUrl($file->file_path),
+                        'mime_type' => $file->mime_type,
+                        'size' => $file->file_size,
+                        'uploaded_at' => $file->created_at,
+                    ];
+
+                    if ($file->file_type === 'document_front') {
+                        $result['front_file'] = $fileData;
+                    } elseif ($file->file_type === 'document_back') {
+                        $result['back_file'] = $fileData;
+                    }
+                }
+            }
+
+            return $result;
+        })->toArray();
+    }
 }

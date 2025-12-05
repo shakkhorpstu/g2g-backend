@@ -100,4 +100,14 @@ interface ProfileDocumentRepositoryInterface
      * @return array|null
      */
     public function getDocumentByTypeWithFiles(string $documentableType, int $documentableId, int $documentTypeId): ?array;
+
+    /**
+     * Get all document types with user status and files (for admin use)
+     *
+     * @param string $documentableType
+     * @param int $documentableId
+     * @param string|null $status
+     * @return array
+     */
+    public function getAllDocumentTypesWithUserStatusAndFiles(string $documentableType, int $documentableId, ?string $status = null): array;
 }

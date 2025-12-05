@@ -397,4 +397,15 @@ class PswProfileService extends BaseService
             return $this->success($prefs, 'Preferences synced successfully');
         });
     }
+
+    /**
+     * Get PSW with profile by PSW ID (for admin use)
+     *
+     * @param int $pswId
+     * @return array|null
+     */
+    public function getPswWithProfileById(int $pswId): ?array
+    {
+        return $this->pswProfileRepository->getPswWithProfile($pswId);
+    }
 }

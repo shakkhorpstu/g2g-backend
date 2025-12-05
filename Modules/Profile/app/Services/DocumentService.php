@@ -266,6 +266,30 @@ class DocumentService extends BaseService
     }
 
     /**
+     * Get all documents for a specific user/PSW by ID (for admin use)
+     * Public method that doesn't require authentication
+     *
+     * @param object $documentable The user or PSW model instance
+     * @param string|null $status Optional status filter
+     * @return array
+     */
+    public function getDocumentsByDocumentable(object $documentable, ?string $status = null): array
+    {
+        // Get documentable type and id
+        $documentableType = get_class($documentable);
+        $documentableId = $documentable->id;
+
+        // Get all document types with user's upload status and files
+        $documents = $this->profileDocumentRepository->getAllDocumentTypesWithUserStatusAndFiles(
+            $documentableType,
+            $documentableId,
+            $status
+        );
+
+        return $documents;
+    }
+
+    /**
      * Validate document file against document type rules
      *
      * @param UploadedFile $file
