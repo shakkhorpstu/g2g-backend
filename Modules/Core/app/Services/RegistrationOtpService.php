@@ -37,7 +37,7 @@ class RegistrationOtpService extends BaseService
         }
 
         // Update phone on user record
-        $this->userRepository->update($user, ['phone_number' => $phone]);
+        // $this->userRepository->update($user, ['phone_number' => $phone]);
 
         $email = $user->email ?? null;
 
@@ -62,7 +62,7 @@ class RegistrationOtpService extends BaseService
         }
 
         // Update phone on PSW record
-        $this->pswRepository->update($psw, ['phone_number' => $phone]);
+        // $this->pswRepository->update($psw, ['phone_number' => $phone]);
 
         $email = $psw->email ?? null;
 

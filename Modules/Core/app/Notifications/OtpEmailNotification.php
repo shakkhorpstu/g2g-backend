@@ -24,7 +24,7 @@ class OtpEmailNotification extends Notification
         return (new MailMessage)
             ->subject('Your Verification Code')
             ->line('Your OTP verification code is: **' . $this->otpCode . '**')
-            ->line('This code will expire in ' . config('app.reset_otp_life', 10) . ' minutes.')
+            ->line('This code will expire in ' . config('app.reset_otp_life', 5) . ' minutes.')
             ->line('If you did not request this code, please ignore this email.');
     }
 }

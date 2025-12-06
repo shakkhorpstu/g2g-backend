@@ -277,6 +277,7 @@ class PswAuthService extends BaseService
             // Mark as verified
             $psw = $this->pswRepository->update($psw, [
                 'is_verified' => true,
+                'phone_number' => $data['identifier'],
                 'email_verified_at' => now(),
             ]);
 

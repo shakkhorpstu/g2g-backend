@@ -26,7 +26,7 @@ class OtpSmsNotification extends Notification
         return [
             'message' => 'Your verification code is: ' . $this->otpCode,
             'code' => $this->otpCode,
-            'expires_in_minutes' => config('app.reset_otp_life', 10),
+            'expires_in_minutes' => config('app.reset_otp_life', 5),
         ];
     }
 
@@ -36,7 +36,7 @@ class OtpSmsNotification extends Notification
         Log::info('SMS OTP Notification', [
             'code' => $this->otpCode,
             'message' => 'Your verification code is: ' . $this->otpCode,
-            'expires_in_minutes' => config('app.reset_otp_life', 10),
+            'expires_in_minutes' => config('app.reset_otp_life', 5),
         ]);
     }
 

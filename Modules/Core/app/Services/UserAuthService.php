@@ -360,7 +360,12 @@ class UserAuthService extends BaseService
             );
 
             // Mark user as verified
-            $user = $this->userRepository->markEmailAsVerified($user);
+            $this->userRepository->update($user, [
+                'is_verified' => true,
+                'phone_number' => $data['identifier'],
+                'email_verified_at' => now(),
+            ]);
+            // $user = $this->userRepository->markEmailAsVerified($user);
 
             return $this->success($user, 'Congratulations! Your account has been verified. You may now access all features');
         });
