@@ -36,11 +36,14 @@ class RegistrationOtpService extends BaseService
             $this->fail('User not found', 404);
         }
 
+        if($user->phone == $data['phone']){
+            $this->fail('Phone number already in use', 422);
+        }
+
         // Update phone on user record
         // $this->userRepository->update($user, ['phone_number' => $phone]);
 
         $email = $user->email ?? null;
-
         return $this->generateAndSendOtp($user, get_class($user), $phone, $email);
     }
 
@@ -61,8 +64,9 @@ class RegistrationOtpService extends BaseService
             $this->fail('PSW not found', 404);
         }
 
-        // Update phone on PSW record
-        // $this->pswRepository->update($psw, ['phone_number' => $phone]);
+        if($psw->phone == $data['phone']){
+            $this->fail('Phone number already in use', 422);
+        }
 
         $email = $psw->email ?? null;
 
@@ -139,7 +143,7 @@ class RegistrationOtpService extends BaseService
             'otp_code' => Crypt::encrypt($otpCode),
             'type' => 'account_verification',
             'status' => 'pending',
-            'expires_at' => now()->addMinutes(config('app.reset_otp_life', 10)),
+            'expires_at' => now()->addMinutes(config('app.reset_otp_life', 5)),
             'attempts' => 0,
             'max_attempts' => 3,
         ]);
@@ -159,10 +163,10 @@ class RegistrationOtpService extends BaseService
             'otp_id' => $otp->id,
             'sent_to' => [
                 'phone' => $this->maskPhone($phone),
-                'email' => $email ? $this->maskEmail($email) : null,
+                // 'email' => $email ? $this->maskEmail($email) : null,
             ],
-            'expires_in_minutes' => config('app.reset_otp_life', 10),
-        ], 'OTP sent to phone number' . ($email ? ' and email' : ''), 201);
+            'expires_in_minutes' => config('app.reset_otp_life', 5),
+        ], 'OTP sent to phone number', 201);
     }
 
     /**

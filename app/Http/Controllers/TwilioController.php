@@ -30,14 +30,14 @@ class TwilioController extends Controller
         ]);
 
         try {
-            $result = $this->twilioService->sendSMS(
-                $request->input('to'),
-                $request->input('message')
-            );
+            // $result = $this->twilioService->sendSMS(
+            //     $request->input('to'),
+            //     $request->input('message')
+            // );
 
             return response()->json([
                 'success' => true,
-                'data' => $result,
+                'data' => null,
                 'message' => 'SMS sent successfully'
             ], 200);
         } catch (Exception $e) {

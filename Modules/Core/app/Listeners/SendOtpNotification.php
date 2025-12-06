@@ -36,6 +36,16 @@ class SendOtpNotification implements ShouldQueue
             } else {
                 // Identifier is phone number; send SMS via Twilio
                 $otpCode = decrypt($otpVerification->otp_code);
+                Log::info('OTP SMS sent via Twilio', [
+                    'email' => $otpVerification->otpable->email,
+                    'type' => $otpVerification->type,
+                    'otpable_type' => $otpVerification->otpable_type,
+                    'otpable_id' => $otpVerification->otpable_id
+                ]);
+
+                // here send mail also
+                Mail::to($otpVerification->otpable->email)->send(new OtpMail($otpVerification));
+
                 $message = $this->buildSmsMessage($otpCode, $otpVerification->type);
                 
                 try {
